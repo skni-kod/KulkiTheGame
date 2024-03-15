@@ -1,15 +1,14 @@
 import { LocalStorage } from "./localStorage.js";
-import { Test } from "./test.js";
 
-const board = document.getElementById("game") as HTMLCanvasElement;
-const context = board.getContext("2d");
+const canvas = document.getElementById("game") as HTMLCanvasElement;
+const context = canvas.getContext("2d");
 if (context === null) {
     throw new Error('2D content not available');
 }
 
 let ballObject = {
-    x: 350,
-    y: 350,
+    x: 10,
+    y: 10,
     r: 15,
     color: "red"
 }
@@ -22,18 +21,18 @@ let drawBall = function () {
 
 }
 
-context.clearRect(0, 0, 700, 700);
+context.clearRect(0, 0, 1600, 1000);
 drawBall();
-
-
-
-const el = document.getElementById("game");
-console.log(el);
-
-const test = new Test();
-
 
 LocalStorage.init();
 LocalStorage.removeItem("b10");
 console.log(LocalStorage.consoleLog());
-console.log(LocalStorage.consoleLog());
+
+while (true) {
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    await sleep(50);
+    ballObject.x += 1;
+    context.fillStyle = "white";
+    context.clearRect(0, 0, 1600, 1000);
+    drawBall();
+}
