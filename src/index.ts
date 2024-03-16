@@ -6,7 +6,6 @@ if (context === null) {
     throw new Error('2D content not available');
 }
 
-// do wyjebnia do innego pliku
 let ballsList = {
     b1: {
         x: canvas.width/2,
@@ -154,9 +153,10 @@ function updateBalls(){
 function Ball(Object){
     this.x = Object.x;
     this.y = Object.y;
-    this.dX = Math.random();
-    this.dY = 1 - this.dX;
-    this.speed = 4;
+    this.speed = Object.speed;
+    this.dX = ((Math.random() * 2) - 1);
+    this.dY = ((Math.floor(Math.random() * (1 - (-1)) - 1) == 0 ? 1 : -1) == 1 ? 
+    (this.dX > 0 ? 1 - this.dX : 1 + this.dX) : (this.dX > 0 ? -1 + this.dX : -1 - this.dX));
     this.radius = Object.r;
     this.color = Object.color;
 
