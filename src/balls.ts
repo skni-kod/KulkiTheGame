@@ -54,8 +54,6 @@ export function Ball(Object){
     this.speed = Object.speed;
     this.dX = ((Math.random() * 2) - 1) * this.speed;
     this.dY = (((Math.random() * 2) - 1) > 0 ? 1 : -1 ) * (Math.sqrt((this.speed * this.speed) - (Math.pow((this.dX), 2))));
-    //this.dY = ((Math.floor(Math.random() * (1 - (-1)) - 1) == 0 ? 1 : -1) == 1 ?
-    //(this.dX > 0 ? 1 - this.dX : 1 + this.dX) : (this.dX > 0 ? -1 + this.dX : -1 - this.dX));
     this.radius = Object.r;
     this.color = Object.color;
 
