@@ -7,28 +7,28 @@ export let ballsList = {
         color: "yellow",
         brickFunction: "basic",
         wallFunction: "bounce",
-        speed: 2000,
+        speed: 200,
     },
     b2: {
         r: 20,
         color: "green",
         brickFunction: "explode",
         wallFunction: "bounce",
-        speed: 3000,
+        speed: 3,
     },
     b3: {
         r: 10,
         color: "blue",
         brickFunction: "basic",
         wallFunction: "sniper",
-        speed: 4000,
+        speed: 4,
     },
     b4: {
         r: 25,
         color: "purple",
         brickFunction: "basic",
         wallFunction: "split",
-        speed: 1000,
+        speed: 4,
     },
 }
 
@@ -86,27 +86,15 @@ export function Ball(Object){
             // calculating the ratio for wall collisions
             if (afterX > areaRight - this.radius) {
                 ratioX = Math.abs((areaRight - this.x - this.radius) / remainingX);
-                if (ratioX > 1) {
-                    console.log("x1: ", areaRight, this.x, this.radius, remainingX);
-                }
             }
             else if (afterX < areaLeft + this.radius) {
                 ratioX = Math.abs((this.x - areaLeft - this.radius) / remainingX);
-                if (ratioX > 1) {
-                    console.log("x2: ", this.x, areaLeft, this.radius, remainingX);
-                }
             }
             if (afterY > areaBottom - this.radius) {
                 ratioY = Math.abs((areaBottom - this.y - this.radius) / remainingY);
-                if (ratioY > 1) {
-                    console.log("y1: ", areaBottom, this.y, this.radius, remainingY);
-                }
             }
             else if (afterY < areaTop + this.radius) {
                 ratioY = Math.abs((this.y - areaTop - this.radius) / remainingY);
-                if (ratioY > 1) {
-                    console.log("y2: ", this.y, areaTop, this.radius, remainingY);
-                }
             }
 
             // ending the loop if there was no collision
@@ -118,6 +106,8 @@ export function Ball(Object){
                 break;
             }
 
+            // TODO: add wall and brick bounce function switches
+
             // calculating the collision
             if (ratioX > ratioY) {
                 // prioritize X direction
@@ -126,16 +116,14 @@ export function Ball(Object){
                 this.y += ratioX * remainingY;
                 remainingY *= 1 - ratioX;
 
-                // temp fix until further debugging is done
                 if (this.x > areaRight) {
                     this.x = (areaRight - (this.x - areaRight));
                 }
-                else if (this.y < areaLeft) {
+                else if (this.x < areaLeft) {
                     this.x *= -1;
                 }
 
                 this.dX *= -1;
-                //console.log("x\n");
             }
             else {
                 // prioritize Y direction
