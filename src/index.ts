@@ -2,6 +2,10 @@ import { LocalStorage } from "./localStorage.js";
 import {ballsList, createBall, updateBalls} from "./balls.js";
 
 export const canvas = document.getElementById("game") as HTMLCanvasElement;
+export const areaLeft : number = 0;
+export const areaRight : number = canvas.width - 400;
+export const areaTop : number = 0;
+export const areaBottom : number = canvas.height;
 export const context = canvas.getContext("2d");
 if (context === null) {
     throw new Error('2D content not available');
@@ -12,7 +16,7 @@ let stage: number = LocalStorage.getItem("level");
 let money: number  = LocalStorage.getItem("money");
 let mouseX: number = 0; 
 let mouseY: number = 0;
-let loopInterval = setInterval(loop,10); 
+let loopInterval = setInterval(loop,25);
 let bricks = new Array();
 export let balls = new Array();
 
