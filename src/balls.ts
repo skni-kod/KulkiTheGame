@@ -1,5 +1,5 @@
 //Balls ༼ つ ◕_◕ ༽つ
-import {areaBottom, areaLeft, areaRight, areaTop, balls, canvas, context} from "./index.js";
+import {areaBottom, areaLeft, areaRight, areaTop, balls, bricks, canvas, context} from "./index.js";
 
 export let ballsList = {
     b1: {
@@ -7,7 +7,7 @@ export let ballsList = {
         color: "yellow",
         brickFunction: "basic",
         wallFunction: "bounce",
-        speed: 200,
+        speed: 2,
     },
     b2: {
         r: 20,
@@ -28,7 +28,7 @@ export let ballsList = {
         color: "purple",
         brickFunction: "basic",
         wallFunction: "split",
-        speed: 4,
+        speed: 4000,
     },
 }
 
@@ -52,6 +52,16 @@ export function Ball(Object){
     this.speed = Object.speed;
     this.dX = ((Math.random() * 2) - 1) * this.speed;
     this.dY = (((Math.random() * 2) - 1) > 0 ? 1 : -1 ) * (Math.sqrt((this.speed * this.speed) - (Math.pow((this.dX), 2))));
+
+    // coordinates of current edges
+    this.r1X = -this.dY;
+    this.r1Y = this.dX;
+    this.r2X = this.dY;
+    this.r2Y = -this.dX;
+
+    // linear function in form of f(x) = ax + b
+    this.lA = this.dY / this.dX;
+    this.lB = this.y - (this.x * this.lA);
 
     this.radius = Object.r;
     this.color = Object.color;
@@ -81,7 +91,52 @@ export function Ball(Object){
             let ratioY : number = 0;
             let ratioX : number = 0;
 
+            // calculating wall collisions
+            // get coords of blocks that are on the ball's path via linear function
+            // maybe an array and then a check where it gets first?
 
+            let candidates = []
+            // vector based algorithm here, finding the next lines crossed by the function up until the end point
+
+            let startX = this.x + this.r1X;
+            let startY = this.y + this.r1Y;
+            let endX = afterX + this.r1X;
+            let endY = afterY + this.r1Y;
+            // first loop here
+            let x = remainingX;
+            let y = remainingY;
+            let brickX = bricks[0].width;
+            let brickY = bricks[0].height;
+            while (x != 0 && y != 0) {
+                // finding the vector ratio to the nearest grid lines in x and y in the correct direction
+                let ratX = 0;
+                let ratY = 0;
+                if (x > 0) {
+                    ratX = (Math.ceil(this.x / brickX) * brickX - this.x) / x;
+                }
+                else {
+                    ratX = (Math.floor(this.x / brickX) * brickX - this.x) / x;
+                }
+                if (x > 0) {
+                    ratY = (Math.ceil(this.x / brickY) * brickY - this.x) / x;
+                }
+                else {
+                    ratY = (Math.floor(this.x / brickY) * brickY - this.x) / x;
+                }
+
+                if (ratX > ratY) {
+                    //
+                }
+            }
+
+            startX = this.x + this.r2X;
+            startY = this.y + this.r2Y;
+            endX = afterX + this.r2X;
+            endY = afterY + this.r2Y;
+            // second loop here
+
+
+            // no bounce check for now, just collision testing
 
             // calculating the ratio for wall collisions
             if (afterX > areaRight - this.radius) {
@@ -109,8 +164,8 @@ export function Ball(Object){
             // TODO: add wall and brick bounce function switches
 
             // calculating the collision
-            if (ratioX > ratioY) {
-                // prioritize X direction
+            if (ratioX < ratioY) {
+                // prioritize X delta
                 this.x += ratioX * remainingX;
                 remainingX *= -(1 - ratioX);
                 this.y += ratioX * remainingY;
@@ -118,15 +173,22 @@ export function Ball(Object){
 
                 if (this.x > areaRight) {
                     this.x = (areaRight - (this.x - areaRight));
+                    console.log("stillx");
                 }
                 else if (this.x < areaLeft) {
                     this.x *= -1;
+                    console.log("stillx");
                 }
 
+                // reversing the direction
                 this.dX *= -1;
+                this.r1X *= -1;
+                this.r2X *= -1;
+                this.lB += 2 * this.lA * this.x;
+                this.lA *= -1;
             }
             else {
-                // prioritize Y direction
+                // prioritize Y delta
                 this.x += ratioY * remainingX;
                 remainingX *= 1 - ratioY;
                 this.y += ratioY * remainingY;
@@ -135,20 +197,21 @@ export function Ball(Object){
                 // temp fix until further debugging is done
                 if (this.y > areaBottom) {
                     this.y = (areaBottom - (this.y - areaBottom));
+                    console.log("stilly");
                 }
                 else if (this.y < areaTop) {
                     this.y *= -1;
+                    console.log("stilly");
                 }
 
+                // reversing the direction
                 this.dY *= -1;
-                //console.log("y\n");
+                this.r1Y *= -1;
+                this.r2Y *= -1;
+                this.lB += 2 * this.lA * this.x;
+                this.lA *= -1;
+
             }
-
-            //console.log(afterX, afterY, remainingX, remainingY, ratioX, ratioY);
-
-
-            //remainingX = 0;
-            //remainingY = 0;
         }
     }
 
