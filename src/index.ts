@@ -1,52 +1,10 @@
 import { LocalStorage } from "./localStorage.js";
+import {ballsList, createBall, updateBalls} from "./balls.js";
 
-const canvas = document.getElementById("game") as HTMLCanvasElement;
-const context = canvas.getContext("2d");
+export const canvas = document.getElementById("game") as HTMLCanvasElement;
+export const context = canvas.getContext("2d");
 if (context === null) {
     throw new Error('2D content not available');
-}
-
-let ballsList = {
-    b1: {
-        x: canvas.width/2,
-        y: canvas.height/2,
-        r: 15,
-        color: "yellow",
-        function: "basic",
-        speed: 2,
-        dX: Math.random(),
-        dY: Math.random(),
-    },
-    b2: {
-        x: canvas.width/2,
-        y: canvas.height/2,
-        r: 20,
-        color: "green",
-        function: "touch",
-        speed: 2,
-        dX: Math.random(),
-        dY: Math.random(),
-    },
-    b3: {
-        x: canvas.width/2,
-        y: canvas.height/2,
-        r: 10,
-        color: "blue",
-        function: "sniper",
-        speed: 4,
-        dX: Math.random(),
-        dY: Math.random(),
-    },
-    b4: {
-        x: canvas.width/2,
-        y: canvas.height/2,
-        r: 25,
-        color: "purple",
-        function: "explode",
-        speed: 1,
-        dX: Math.random() ,
-        dY: Math.random(),
-    },
 }
 
 LocalStorage.init();
@@ -56,7 +14,7 @@ let mouseX: number = 0;
 let mouseY: number = 0;
 let loopInterval = setInterval(loop,10); 
 let bricks = new Array();
-let balls = new Array();
+export let balls = new Array();
 
 initGame();
 
@@ -138,46 +96,3 @@ function updateBricks(){
     }
 }
 
-//Balls ༼ つ ◕_◕ ༽つ
-function createBall(Object){
-    let ball = new Ball(Object);
-    balls.push(ball);
-}
-
-function updateBalls(){
-    for(let i:number = 0; i < balls.length; i++){
-        balls[i].update();
-    }
-}
-
-function Ball(Object){
-    this.x = Object.x;
-    this.y = Object.y;
-    this.speed = Object.speed;
-    this.dX = ((Math.random() * 2) - 1);
-    this.dY = ((Math.floor(Math.random() * (1 - (-1)) - 1) == 0 ? 1 : -1) == 1 ? 
-    (this.dX > 0 ? 1 - this.dX : 1 + this.dX) : (this.dX > 0 ? -1 + this.dX : -1 - this.dX));
-    this.radius = Object.r;
-    this.color = Object.color;
-
-    this.update = () =>{
-        this.y+=this.dY;
-		this.x+=this.dX;
-		this.bounds();
-		context.fillStyle = this.color;
-		context.beginPath();
-		context.arc(this.x,this.y,this.radius,0,Math.PI*2,true);
-		context.fill();
-    }
-
-    this.bounds = function(){
-		if(this.x + this.radius/2 >= canvas.width || this.x - this.radius/2 < 0) {
-            this.dX *= -1;
-        }
-        if(this.y - this.radius/2 < 0 || this.y + this.radius/2 >= canvas.height ){
-            this.dY *= -1;
-        }
-        this.x += this.dX * this.speed;
-        this.y += this.dY * this.speed;
-	}
-}
