@@ -25,7 +25,7 @@ initGame();
 console.log(bricks);
 
 function initGame(){
-    drawBoard(34);
+    drawBoard(136);
     createBall(ballsList.b1);
     createBall(ballsList.b2);
     createBall(ballsList.b3);
@@ -44,6 +44,7 @@ function clearContext(){
 
 function loop(){
     draw();
+    ballHit();
 }
 
 function draw(){
@@ -94,9 +95,26 @@ function createBrick(x: number, y:number, width: number, height: number){
     bricks.push(brick);
 }
 
+function removeBrick(id){
+    bricks.splice(id,1);
+}
+
 function updateBricks(){
     for(let i:number = 0; i < bricks.length; i++){
         bricks[i].update();
     }
 }
 
+function ballHit(){
+    for(let i: number = 0; i < bricks.length; i++){
+        for (let j: number = 0; j < balls.length; j++){
+            if(
+                (balls[j].x > bricks[i].x) &&
+                (balls[j].x < bricks[i].x + bricks[i].width) &&
+                (balls[j].y + balls[j].radius > bricks[i].y) &&
+                (balls[j].y - balls[j].radius < bricks[i].y + bricks[i].height)){
+                removeBrick(i);
+            }
+        }
+    }
+}
