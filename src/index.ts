@@ -4,9 +4,9 @@ import { createBrick, updateBricks, removeBrick, updateHps, setHps } from "./bri
 
 export const canvas = document.getElementById("game") as HTMLCanvasElement;
 export const areaLeft : number = 0;
-export const areaRight : number = canvas.width;
+export const areaRight : number = 1600;
 export const areaTop : number = 0;
-export const areaBottom : number = canvas.height;
+export const areaBottom : number = 1000;
 export const context = canvas.getContext("2d");
 let stage: number = LocalStorage.getItem("level");
 let money: number = LocalStorage.getItem("money");
@@ -35,13 +35,54 @@ function nextLevel(){
     createBoard(34);
 }
 
+function initBalls(){
+    function addBall(amount: number, type: number){
+        for (let i = 0; i < amount; i++){
+            switch (type) {
+                case 1:
+                    createBall(ballsList.b1);
+                    break;
+                case 2:
+                    createBall(ballsList.b2);
+                    break;
+                case 3:
+                    createBall(ballsList.b3);
+                    break;
+                case 4:
+                    createBall(ballsList.b4);
+                    break;
+            
+                default:
+                    break;
+            }
+        }
+    }
+    if(LocalStorage.getItem("b1")){
+        addBall(LocalStorage.getItem("b1"),1);
+        console.log("test1");
+    }
+    if(LocalStorage.getItem("b2")){
+        addBall(LocalStorage.getItem("b2"),2);
+        console.log("test2");
+    }
+    if(LocalStorage.getItem("b3")){
+        addBall(LocalStorage.getItem("b3"),3);
+        console.log("test3");
+    }
+    if(LocalStorage.getItem("b4")){
+        addBall(LocalStorage.getItem("b4"),4);
+        console.log("test4");
+    }
+}
+
 function initGame(){
+    canvas.width = areaRight;
+    canvas.height = areaBottom;
+    LocalStorage.setItem("b3",2);
+    LocalStorage.consoleLog();
     createBoard(512);
     setHps();
-    createBall(ballsList.b1);
-    createBall(ballsList.b2);
-    createBall(ballsList.b3);
-    createBall(ballsList.b4);
+    initBalls();
 }
 
 function createBoard(numberOfBricks: number){
