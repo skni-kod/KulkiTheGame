@@ -1,6 +1,6 @@
 import { LocalStorage } from "./localStorage.js";
 import { ballsList, createBall, updateBalls } from "./balls.js";
-import { createBrick, updateBricks, removeBrick } from "./bricks.js";
+import { createBrick, updateBricks, removeBrick, updateHps, setHps } from "./bricks.js";
 
 export const canvas = document.getElementById("game") as HTMLCanvasElement;
 export const areaLeft : number = 0;
@@ -17,6 +17,7 @@ export let densityY: number = 32;
 let loopInterval = setInterval(loop,25);
 export let bricks = new Array();
 export let balls = new Array();
+export let bricksHps = new Array();
 
 LocalStorage.init();
 if (context === null) {
@@ -36,6 +37,7 @@ function nextLevel(){
 
 function initGame(){
     createBoard(512);
+    setHps();
     createBall(ballsList.b1);
     createBall(ballsList.b2);
     createBall(ballsList.b3);
@@ -60,6 +62,7 @@ function loop() {
 function draw() {
     clearContext();
     updateBricks();
+    updateHps();
     updateBalls();
     if(bricks.length==0){
         nextLevel();
