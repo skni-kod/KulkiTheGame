@@ -1,5 +1,18 @@
 import {areaBottom, areaLeft, areaRight, areaTop, balls, bricks, canvas, context, densityX, densityY, bricksHps} from "./index.js";
 
+const brickColor = {
+    0: "#25f522",
+    1: "#34a412",
+    2: "#aaaadf",
+    3: "#6078fe",
+    4: "#298253",
+    5: "#abcdef",
+    6: "#fedcbe",
+    7: "#888888",
+    8: "#18acac",
+    9: "#99ac99"
+}
+
 //Bricks
 function Brick(x: number, y: number, width: number, height: number) {
     this.x = x;
@@ -11,32 +24,7 @@ function Brick(x: number, y: number, width: number, height: number) {
 
     this.update = () => {
         if (this.hp > 0) {
-            switch (this.hp % 8) {
-                case 0:
-                    context.fillStyle = "#25f522";
-                    break;
-                case 1:
-                    context.fillStyle = "#34a412";
-                    break;
-                case 2:
-                    context.fillStyle = "#aaaadf";
-                    break;
-                case 3:
-                    context.fillStyle = "#6078fe";
-                    break;
-                case 4:
-                    context.fillStyle = "#298253";
-                    break;
-                case 5:
-                    context.fillStyle = "#abcdef";
-                    break;
-                case 6:
-                    context.fillStyle = "#fedcbe";
-                    break;
-                case 7:
-                    context.fillStyle = "#888888";
-                    break;
-            }
+            context.fillStyle = brickColor[this.hp % 10];
             context.fillRect(this.x,this.y,this.width,this.height);
             context.strokeStyle = this.strokeStyle;
             context.strokeRect(this.x, this.y, this.width, this.height);
