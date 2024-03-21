@@ -44,6 +44,10 @@ export function updateBalls(){
     }
 }
 
+function getIndex(x : number, y : number) : number {
+    return x + (y * 16);
+}
+
 export function Ball(Object){
 
     this.x = (areaRight + areaLeft) / 2;
@@ -92,47 +96,143 @@ export function Ball(Object){
             let ratioX : number = 0;
 
             // calculating wall collisions
+            // UNOPTIMIZED, EXPERIMENTAL
             // get coords of blocks that are on the ball's path via linear function
             // maybe an array and then a check where it gets first?
 
             let candidates = []
             // vector based algorithm here, finding the next lines crossed by the function up until the end point
 
-            let startX = this.x + this.r1X;
-            let startY = this.y + this.r1Y;
-            let endX = afterX + this.r1X;
-            let endY = afterY + this.r1Y;
+            //let startX = this.x + this.r1X;
+            //let startY = this.y + this.r1Y;
+            //let endX = afterX + this.r1X;
+            //let endY = afterY + this.r1Y;
             // first loop here
-            let x = remainingX;
-            let y = remainingY;
+            let x = this.x + this.r1X;
+            let y = this.y + this.r1Y;
+            let remX = remainingX;
+            let remY = remainingY;
             let brickX = bricks[0].width;
             let brickY = bricks[0].height;
-            while (x != 0 && y != 0) {
+            let is1 = false;
+            let x1 = 0;
+            let y1 = 0;
+            while (remX != 0 && remY != 0) {
                 // finding the vector ratio to the nearest grid lines in x and y in the correct direction
-                let ratX = 0;
-                let ratY = 0;
-                if (x > 0) {
-                    ratX = (Math.ceil(this.x / brickX) * brickX - this.x) / x;
+                let ratX : number;
+                let ratY : number;
+                let temp : number;
+                if (remX > 0) {
+                    temp = Math.ceil(x / brickX) * brickX;
+                    if (temp == areaRight) {
+                        ratX = 1;
+                    }
+                    else {
+                        ratX = (temp - x) / remX;
+                    }
+                }
+                else if (remX < 0) {
+                    temp = Math.floor(x / brickX) * brickX;
+                    if (temp == areaLeft) {
+                        ratX = 1;
+                    }
+                    else {
+                        ratX = (x - temp) / remX;
+                    }
                 }
                 else {
-                    ratX = (Math.floor(this.x / brickX) * brickX - this.x) / x;
-                }
-                if (x > 0) {
-                    ratY = (Math.ceil(this.x / brickY) * brickY - this.x) / x;
-                }
-                else {
-                    ratY = (Math.floor(this.x / brickY) * brickY - this.x) / x;
+                    ratX = 1;
                 }
 
-                if (ratX > ratY) {
-                    //
+                if (remY > 0) {
+                    temp = Math.ceil(y / brickY) * brickY;
+                    if (temp == areaBottom) {
+                        ratY = 1;
+                    }
+                    else {
+                        ratY = (temp - x) / remY;
+                    }
+                }
+                else if (remY < 0){
+                    temp = Math.floor(y / brickY) * brickY;
+                    if (temp == areaTop) {
+                        ratY = 1;
+                    }
+                    else {
+                        ratY = (y - temp) / remY;
+                    }
+                }
+                else {
+                    ratY = 1;
+                }
+
+
+                // with the ratios calculated we can find the nearest grid line
+                if (ratX < ratY && ratX <= 1) {
+                    // if it's closer in x
+                    // check if the colliding brick is actually valid
+                    if (remX > 0 && bricks[getIndex(Math.ceil(x / brickX), Math.floor(y / brickY))].hp > 0) {
+                        // brick to the right, move there
+                        x += remY * ratX;
+                        y += remX * ratX;
+                        remX *= (1 - ratX);
+                        remY *= (1 - ratX);
+                        is1 = true;
+                        x1 = Math.ceil(x / brickX);
+                        y1 = Math.floor(y / brickY);
+                        break;
+                    }
+                    else if (remX > 0 && bricks[getIndex(Math.floor(x / brickX) - 1, Math.floor(y / brickY))].hp > 0){
+                        // brick to the left, move there
+                        x += remY * ratX;
+                        y += remX * ratX;
+                        remX *= (1 - ratX);
+                        remY *= (1 - ratX);
+                        is1 = true;
+                        x1 = Math.floor(x / brickX) - 1;
+                        y1 = Math.floor(y / brickY);
+                        break;
+                    }
+                }
+
+                if (ratY > 1) {
+                    // no collision
+                    break;
+                }
+
+                // closer in y
+                if (remY > 0 && bricks[getIndex(Math.floor(x / brickX), Math.ceil(y / brickY))].hp > 0) {
+                    // brick to the bottom, move there
+                    x += remY * ratY;
+                    y += remX * ratY;
+                    remX *= (1 - ratY);
+                    remY *= (1 - ratY);
+                    is1 = true;
+                    x1 = Math.floor(x / brickX);
+                    y1 = Math.ceil(y / brickY);
+                    break;
+                }
+                else if (remY > 0 && bricks[getIndex(Math.floor(x / brickX), Math.floor(y / brickY) - 1)].hp > 0){
+                    // brick to the top, move there
+                    x += remY * ratY;
+                    y += remX * ratY;
+                    remX *= (1 - ratY);
+                    remY *= (1 - ratY);
+                    is1 = true;
+                    x1 = Math.floor(x / brickX);
+                    y1 = Math.floor(y / brickY) - 1;
+                    break;
                 }
             }
 
-            startX = this.x + this.r2X;
-            startY = this.y + this.r2Y;
-            endX = afterX + this.r2X;
-            endY = afterY + this.r2Y;
+            if (is1) {
+
+            }
+
+            //startX = this.x + this.r2X;
+            //startY = this.y + this.r2Y;
+            //endX = afterX + this.r2X;
+            //endY = afterY + this.r2Y;
             // second loop here
 
 
@@ -164,7 +264,7 @@ export function Ball(Object){
             // TODO: add wall and brick bounce function switches
 
             // calculating the collision
-            if (ratioX < ratioY) {
+            if (ratioX != 0 && (ratioY == 0 || ratioX < ratioY)) {
                 // prioritize X delta
                 this.x += ratioX * remainingX;
                 remainingX *= -(1 - ratioX);
