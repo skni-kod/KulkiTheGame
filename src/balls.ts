@@ -83,7 +83,8 @@ export function Ball(Object){
 
     this.calculateBricks = function(x : number, y : number, remX : number, remY : number ) {
         // in order: is, x, y
-        while (remX != 0 || remY != 0) {
+        console.log(x, y);
+        while (remX != 0 && remY != 0) {
             //console.log("looping");
             // while there's a distance left check
             let ratX  = -1;
@@ -153,12 +154,12 @@ export function Ball(Object){
             // now check if there were collisions
             //console.log(x, y, ratX, ratY);
             if (x > areaLeft + brickX && x < areaRight - brickX && ratX != -1 && (ratX < ratY || ratY == -1) && bricks[getIndex(Math.floor(x / brickX) + offX, Math.floor(y / brickY))].hp > 0) {
-                console.log("col X");
+                //console.log("col X");
                 // X must be closer
                 return [1, x + ratX * remX, y + ratY * remX];
             }
             else if (y > areaTop + brickY && y < areaBottom - brickY && ratY != -1 && bricks[getIndex(Math.floor(x / brickX), Math.floor(y / brickY) + offY)].hp > 0) {
-                console.log("col Y");
+                //console.log("col Y");
                 // Y is nearer
                 return [2, x + ratX * remY, y + ratY * remY];
             }
@@ -227,10 +228,106 @@ export function Ball(Object){
             // calculating wall collisions
             // UNOPTIMIZED, EXPERIMENTAL
 
-            //console.log(this.r1X, this.r1Y);
+            //console.log("start");
             let resE1 = this.calculateBricks(this.x + this.r1X, this.y + this.r1Y, remainingX, remainingY);
             let resE2 = this.calculateBricks(this.x + this.r2X, this.y + this.r2Y, remainingX, remainingY);
             let resM = this.calculateBricks(this.x + this.mX, this.y + this.mY, remainingX, remainingY);
+            //console.log("after");
+            // good ol if's
+            // get distance
+            let which = 0;
+            let min = -1;
+            if (resE1[0] != 0) {
+                min = Math.pow(resE1[1], 2) + Math.pow(resE1[2], 2);
+                which = 1;
+            }
+            if (resE2[0] != 0) {
+                let temp = Math.pow(resE2[1], 2) + Math.pow(resE2[2], 2);
+                if (temp < min) {
+                    min = temp;
+                    which = 2;
+                }
+            }
+            if (resM[0] != 0) {
+                let temp = Math.pow(resM[1], 2) + Math.pow(resM[2], 2);
+                if (temp < min) {
+                    min = temp;
+                    which = 3;
+                }
+            }
+            console.log("1 ", this.x, this.y)
+
+            if (which != 0) {
+                // now there's only one, the one closest
+                switch (which) {
+                    case 1:
+                        // edge 1
+                        remainingX -= (resE1[1] - this.r1X) - this.x;
+                        remainingY -= (resE1[2] - this.r1Y) - this.y;
+                        this.x = resE1[1] - this.r1X;
+                        this.y = resE1[2] - this.r1Y;
+                        if (resE1[0] == 1) {
+                            // reverse X
+                            this.dX *= -1;
+                            this.mX *= -1;
+                            this.r1X *= -1;
+                            this.r2X *= -1;
+                        }
+                        else {
+                            this.dY *= -1;
+                            this.mY *= -1;
+                            this.r1Y *= -1;
+                            this.r2Y *= -1;
+                        }
+                        console.log("3 ", this.x, this.y)
+                        break;
+                    case 2:
+                        // edge 2
+                        remainingX -= (resE2[1] - this.r2X) - this.x;
+                        remainingY -= (resE2[2] - this.r2Y) - this.y;
+                        this.x = resE2[1] - this.r2X;
+                        this.y = resE2[2] - this.r2Y;
+                        if (resE2[0] == 1) {
+                            // reverse X
+                            this.dX *= -1;
+                            this.mX *= -1;
+                            this.r1X *= -1;
+                            this.r2X *= -1;
+                        }
+                        else {
+                            this.dY *= -1;
+                            this.mY *= -1;
+                            this.r1Y *= -1;
+                            this.r2Y *= -1;
+                        }
+                        console.log("4 ", this.x, this.y)
+
+                        break;
+                    case 3:
+                        // middle
+                        remainingX -= (resM[1] - this.rM) - this.x;
+                        remainingY -= (resM[2] - this.rM) - this.y;
+                        this.x = resM[1] - this.rM;
+                        this.y = resM[2] - this.rM;
+                        if (resM[0] == 1) {
+                            // reverse X
+                            this.dX *= -1;
+                            this.mX *= -1;
+                            this.r1X *= -1;
+                            this.r2X *= -1;
+                        }
+                        else {
+                            this.dY *= -1;
+                            this.mY *= -1;
+                            this.r1Y *= -1;
+                            this.r2Y *= -1;
+                        }
+                        console.log("5 ", this.x, this.y)
+                        break;
+                }
+                console.log("2 ", this.x, this.y)
+                continue;
+            }
 
             //console.log("after loop");
 
