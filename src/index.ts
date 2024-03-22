@@ -6,6 +6,8 @@ export const areaLeft : number = 0;
 export const areaRight : number = canvas.width - 400;
 export const areaTop : number = 0;
 export const areaBottom : number = canvas.height;
+export const brickX = (areaRight - areaLeft) / 16;
+export const brickY = (areaBottom - areaTop) / 32;
 export const context = canvas.getContext("2d");
 if (context === null) {
     throw new Error('2D content not available');
