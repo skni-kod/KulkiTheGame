@@ -116,15 +116,16 @@ function updateBricks(){
 }
 
 function ballHit(){
-    for(let i: number = 0; i < bricks.length; i++){
-        for (let j: number = 0; j < balls.length; j++){
-            if(
-                (balls[j].x > bricks[i].x) &&
-                (balls[j].x < bricks[i].x + bricks[i].width) &&
-                (balls[j].y + balls[j].radius > bricks[i].y) &&
-                (balls[j].y - balls[j].radius < bricks[i].y + bricks[i].height)){
-                removeBrick(i);
-            }
-        }
-    }
+    // fu
+    //for(let i: number = 0; i < bricks.length; i++){
+    //    for (let j: number = 0; j < balls.length; j++){
+    //        if(
+    //            (balls[j].x > bricks[i].x) &&
+    //            (balls[j].x < bricks[i].x + bricks[i].width) &&
+    //            (balls[j].y + balls[j].radius > bricks[i].y) &&
+    //            (balls[j].y - balls[j].radius < bricks[i].y + bricks[i].height)){
+    //            removeBrick(i);
+    //        }
+    //    }
+    //}
 }
