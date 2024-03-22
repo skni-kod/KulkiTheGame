@@ -19,3 +19,32 @@ body{
 #game{
     border: 5px solid black;
 }
+
+#navigation{
+    background-color: aquamarine;
+    border-color: black;
+    border-style: solid;
+    border-width: 5px 5px 5px 0;
+    box-sizing: content-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: space-around;
+}
+
+.submenu-items{
+    display: grid;
+    grid-template-columns:75px 75px;
+    grid-auto-rows: 75px;
+}
+
+.grid-item{
+    width: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid black;
+}
+
+.submenu-title{
+    text-align: center;
+}

@@ -3,6 +3,8 @@ import { ballsList, createBall, updateBalls } from "./balls.js";
 import { createBrick, updateBricks, removeBrick, updateHps, setHps } from "./bricks.js";
 
 export const canvas = document.getElementById("game") as HTMLCanvasElement;
+const h4 = document.querySelectorAll("h4");
+const navigation = document.getElementById("navigation");
 export const areaLeft : number = 0;
 export const areaRight : number = 1600;
 export const areaTop : number = 0;
@@ -24,6 +26,11 @@ if (context === null) {
     throw new Error('2D content not available');
 }
 
+h4.forEach(  (el)=> {
+    el.onclick = () =>{
+        createBall(ballsList.b1);
+    }
+});
 
 initGame();
 
@@ -59,25 +66,23 @@ function initBalls(){
     }
     if(LocalStorage.getItem("b1")){
         addBall(LocalStorage.getItem("b1"),1);
-        console.log("test1");
     }
     if(LocalStorage.getItem("b2")){
         addBall(LocalStorage.getItem("b2"),2);
-        console.log("test2");
     }
     if(LocalStorage.getItem("b3")){
         addBall(LocalStorage.getItem("b3"),3);
-        console.log("test3");
     }
     if(LocalStorage.getItem("b4")){
         addBall(LocalStorage.getItem("b4"),4);
-        console.log("test4");
     }
 }
 
 function initGame(){
     canvas.width = areaRight;
     canvas.height = areaBottom;
+    navigation.style.width = "150px";
+    navigation.style.height = String(canvas.height) + "px";
     LocalStorage.setItem("b3",2);
     LocalStorage.consoleLog();
     createBoard(512);
