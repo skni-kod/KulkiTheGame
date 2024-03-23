@@ -24,11 +24,11 @@ export let ballsList = {
         speed: 4,
     },
     b4: {
-        r: 25,
+        r: 10,
         color: "purple",
         brickFunction: "basic",
         wallFunction: "split",
-        speed: 2,
+        speed: 20,
     },
 }
 
@@ -83,9 +83,32 @@ export function Ball(Object){
 
     this.calculateBricks = function(x : number, y : number, remX : number, remY : number ) {
         // in order: is, x, y
-        console.log(x, y);
+
+        if (remX > 0 ) {
+            if (x + remX >= areaRight) {
+                remX = areaRight - x - 1;
+            }
+        }
+        else {
+            if (x + remX <= areaLeft) {
+                remX = x - areaLeft + 1;
+            }
+        }
+
+        if (remY > 0 ) {
+            if (y + remY >= areaBottom) {
+                remY = areaBottom - y - 1;
+            }
+        }
+        else {
+            if (y + remY <= areaTop) {
+                remY = y - areaTop + 1;
+            }
+        }
+        //console.log(x, y);
         while (remX != 0 && remY != 0) {
-            //console.log("looping");
+
+           // console.log("looping");
             // while there's a distance left check
             let ratX  = -1;
             let ratY  = -1;
@@ -138,7 +161,7 @@ export function Ball(Object){
             else if (remY < 0) {
                 // y in neg
                 // get nearest line to up
-                let temp = Math.floor(x / brickY) * brickY;
+                let temp = Math.floor(y / brickY) * brickY;
                 if (temp <= areaTop) {
 
                 }
@@ -153,15 +176,15 @@ export function Ball(Object){
 
             // now check if there were collisions
             //console.log(x, y, ratX, ratY);
-            if (x > areaLeft + brickX && x < areaRight - brickX && ratX != -1 && (ratX < ratY || ratY == -1) && bricks[getIndex(Math.floor(x / brickX) + offX, Math.floor(y / brickY))].hp > 0) {
+            if ((x > areaLeft + brickX || remX >= 0) && (x < areaRight - brickX || remX < 0) && ratX > 0 && (ratX < ratY || ratY == -1) && bricks[getIndex(Math.floor(x / brickX) + offX, Math.floor(y / brickY))].hp > 0) {
                 //console.log("col X");
                 // X must be closer
-                return [1, x + ratX * remX, y + ratY * remX];
+                return [1, x + ratX * remX, y + ratX * remY, getIndex(Math.floor(x / brickX) + offX, Math.floor(y / brickY))];
             }
-            else if (y > areaTop + brickY && y < areaBottom - brickY && ratY != -1 && bricks[getIndex(Math.floor(x / brickX), Math.floor(y / brickY) + offY)].hp > 0) {
+            else if ((y > areaTop + brickY || remY >= 0) && (y < areaBottom - brickY || remY < 0) && ratY > 0 && bricks[getIndex(Math.floor(x / brickX), Math.floor(y / brickY) + offY)].hp > 0) {
                 //console.log("col Y");
                 // Y is nearer
-                return [2, x + ratX * remY, y + ratY * remY];
+                return [2, x + ratY * remX, y + ratY * remY, getIndex(Math.floor(x / brickX), Math.floor(y / brickY) + offY)];
             }
             else {
                 //console.log("3", brickX, brickY);
@@ -170,7 +193,7 @@ export function Ball(Object){
                     if (Math.abs(remY) < brickY) {
                         //console.log("4");
                         // loop ends here, no collision and distance has been traveled
-                        return [0, 0, 0];
+                        return [0];
                     }
                     else {
                         //console.log("5");
@@ -216,7 +239,7 @@ export function Ball(Object){
         let remainingY : number = this.dY;
 
 
-        //console.log("strt ", remainingX, remainingY, this.x, this.y);
+        //console.log("start ", this.dX, this.dY, this.mX, this.mY);
         while (remainingX != 0 || remainingY != 0) {
 
             let afterX = this.x + remainingX;
@@ -228,15 +251,38 @@ export function Ball(Object){
             // calculating wall collisions
             // UNOPTIMIZED, EXPERIMENTAL
 
+            //let r = this.calculateBricks(this.x, this.y, remainingX, remainingY);
+            //if (r[0] != 0) {
+            //    remainingX -= r[1] - this.x;
+            //    remainingY -= r[2] - this.y;
+            //    this.x = r[1];
+            //    this.y = r[2];
+            //    if (r[0] == 1) {
+            //        // reverse X
+            //        this.dX *= -1;
+            //        this.mX *= -1;
+            //        this.r1X *= -1;
+            //        this.r2X *= -1;
+            //    }
+            //    else {
+            //        this.dY *= -1;
+            //        this.mY *= -1;
+            //        this.r1Y *= -1;
+            //        this.r2Y *= -1;
+            //    }
+            //}
+
             //console.log("start");
             let resE1 = this.calculateBricks(this.x + this.r1X, this.y + this.r1Y, remainingX, remainingY);
             let resE2 = this.calculateBricks(this.x + this.r2X, this.y + this.r2Y, remainingX, remainingY);
             let resM = this.calculateBricks(this.x + this.mX, this.y + this.mY, remainingX, remainingY);
+            //let resE2 = [0, 0, 0];
+            //let resE1 = [0, 0, 0];
             //console.log("after");
             // good ol if's
             // get distance
             let which = 0;
-            let min = -1;
+            let min = 1000000;
             if (resE1[0] != 0) {
                 min = Math.pow(resE1[1], 2) + Math.pow(resE1[2], 2);
                 which = 1;
@@ -255,13 +301,14 @@ export function Ball(Object){
                     which = 3;
                 }
             }
-            console.log("1 ", this.x, this.y)
+            //console.log("a1 ", this.x, this.y)
 
             if (which != 0) {
                 // now there's only one, the one closest
                 switch (which) {
                     case 1:
                         // edge 1
+                        //console.log("calc: ", resE1);
                         remainingX -= (resE1[1] - this.r1X) - this.x;
                         remainingY -= (resE1[2] - this.r1Y) - this.y;
                         this.x = resE1[1] - this.r1X;
@@ -279,7 +326,8 @@ export function Ball(Object){
                             this.r1Y *= -1;
                             this.r2Y *= -1;
                         }
-                        console.log("3 ", this.x, this.y)
+                        bricks[resE1[3]].hp = 0;
+                        //console.log("a3 ", this.x, this.y)
                         break;
                     case 2:
                         // edge 2
@@ -300,15 +348,18 @@ export function Ball(Object){
                             this.r1Y *= -1;
                             this.r2Y *= -1;
                         }
-                        console.log("4 ", this.x, this.y)
+                        //console.log("a4 ", this.x, this.y)
+                        bricks[resE2[3]].hp = 0;
 
                         break;
                     case 3:
+                        //console.log("prea5 ", this.x, this.y)
                         // middle
-                        remainingX -= (resM[1] - this.rM) - this.x;
-                        remainingY -= (resM[2] - this.rM) - this.y;
-                        this.x = resM[1] - this.rM;
-                        this.y = resM[2] - this.rM;
+                        remainingX -= (resM[1] - this.mX) - this.x;
+                        remainingY -= (resM[2] - this.mY) - this.y;
+                        this.x = resM[1] - this.mX;
+                        this.y = resM[2] - this.mY;
+                        //console.log(resM[1], resM[2], )
                         if (resM[0] == 1) {
                             // reverse X
                             this.dX *= -1;
@@ -322,10 +373,11 @@ export function Ball(Object){
                             this.r1Y *= -1;
                             this.r2Y *= -1;
                         }
-                        console.log("5 ", this.x, this.y)
+                        //console.log("a5 ", this.x, this.y)
+                        bricks[resM[3]].hp = 0;
                         break;
                 }
-                console.log("2 ", this.x, this.y)
+                //console.log("a2 ", this.x, this.y)
                 continue;
             }
 
@@ -367,15 +419,6 @@ export function Ball(Object){
                 this.y += ratioX * remainingY;
                 remainingY *= 1 - ratioX;
 
-                if (this.x > areaRight) {
-                    this.x = (areaRight - (this.x - areaRight));
-                    console.log("stillx");
-                }
-                else if (this.x < areaLeft) {
-                    this.x *= -1;
-                    console.log("stillx");
-                }
-
                 // reversing the direction
                 this.dX *= -1;
                 this.mX *= -1;
@@ -389,16 +432,6 @@ export function Ball(Object){
                 this.y += ratioY * remainingY;
                 remainingY *= -(1 - ratioY);
 
-                // temp fix until further debugging is done
-                if (this.y > areaBottom) {
-                    this.y = (areaBottom - (this.y - areaBottom));
-                    console.log("stilly");
-                }
-                else if (this.y < areaTop) {
-                    this.y *= -1;
-                    console.log("stilly");
-                }
-
                 // reversing the direction
                 this.dY *= -1;
                 this.mY *= -1;
@@ -406,18 +439,6 @@ export function Ball(Object){
                 this.r2Y *= -1;
 
             }
-        }
-    }
-
-    this.handleCollisionsOld = function(){
-        this.y+=this.dY;
-        this.x+=this.dX;
-        // old system, will be replaced by a superior one
-        if(this.x + this.radius >= areaRight || this.x - this.radius < 0) {
-            this.dX *= -1;
-        }
-        if(this.y + this.radius >= areaBottom || this.y - this.radius < 0) {
-            this.dY *= -1;
         }
     }
 }
