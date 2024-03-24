@@ -9,6 +9,8 @@ export const areaLeft : number = 0;
 export const areaRight : number = 1600;
 export const areaTop : number = 0;
 export const areaBottom : number = 1000;
+export const brickX = (areaRight - areaLeft) / 16;
+export const brickY = (areaBottom - areaTop) / 32;
 export const context = canvas.getContext("2d");
 let stage: number = LocalStorage.getItem("level");
 let money: number = LocalStorage.getItem("money");
@@ -116,18 +118,18 @@ function draw() {
 }
 
 function ballHit() {
-    for (let i: number = 0; i < bricks.length; i++) {
-        for (let j: number = 0; j < balls.length; j++) {
-            if (
-                (balls[j].x > bricks[i].x) &&
-                (balls[j].x < bricks[i].x + bricks[i].width) &&
-                (balls[j].y + balls[j].radius > bricks[i].y) &&
-                (balls[j].y - balls[j].radius < bricks[i].y + bricks[i].height)) {
-                bricks[i].health--;
-                if(bricks[i].health==0){
-                    removeBrick(i);
-                }
-            }
-        }
-    }
+    // for (let i: number = 0; i < bricks.length; i++) {
+    //     for (let j: number = 0; j < balls.length; j++) {
+    //         if (
+    //             (balls[j].x > bricks[i].x) &&
+    //             (balls[j].x < bricks[i].x + bricks[i].width) &&
+    //             (balls[j].y + balls[j].radius > bricks[i].y) &&
+    //             (balls[j].y - balls[j].radius < bricks[i].y + bricks[i].height)) {
+    //             bricks[i].health--;
+    //             if(bricks[i].health==0){
+    //                 removeBrick(i);
+    //             }
+    //         }
+    //     }
+    // }
 }
