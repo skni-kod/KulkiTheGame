@@ -1,6 +1,6 @@
 import { LocalStorage } from "./localStorage.js";
 import { ballsList, createBall, updateBalls } from "./balls.js";
-import { createBrick, updateBricks, removeBrick, updateHps, setHps } from "./bricks.js";
+import { createBrick, updateBricks, removeBrick, createBoard, updateHps, setHps } from "./bricks.js";
 
 export const canvas = document.getElementById("game") as HTMLCanvasElement;
 const h4 = document.querySelectorAll("h4");
@@ -35,8 +35,6 @@ h4.forEach(  (el)=> {
 });
 
 initGame();
-
-console.log(bricks);
 
 function nextLevel(){
     stage++;
@@ -85,17 +83,11 @@ function initGame(){
     canvas.height = areaBottom;
     navigation.style.width = "150px";
     navigation.style.height = String(canvas.height) + "px";
-    LocalStorage.setItem("b3",2);
+    LocalStorage.setItem("b3",1);
     LocalStorage.consoleLog();
     createBoard(512);
     setHps();
     initBalls();
-}
-
-function createBoard(numberOfBricks: number){
-    for (let i: number = 0; i < numberOfBricks; i++){
-        createBrick();
-    }
 }
 
 function clearContext() {

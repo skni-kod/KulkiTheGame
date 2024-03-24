@@ -1,5 +1,6 @@
 //Balls ༼ つ ◕_◕ ༽つ
 import {areaBottom, areaLeft, areaRight, areaTop, balls, bricks, canvas, context, brickX, brickY} from "./index.js";
+import { updateHps } from "./bricks.js";
 
 export let ballsList = {
     b1: {
@@ -238,7 +239,6 @@ export function Ball(Object){
         let remainingX : number = this.dX;
         let remainingY : number = this.dY;
 
-
         //console.log("start ", this.dX, this.dY, this.mX, this.mY);
         while (remainingX != 0 || remainingY != 0) {
 
@@ -326,7 +326,8 @@ export function Ball(Object){
                             this.r1Y *= -1;
                             this.r2Y *= -1;
                         }
-                        bricks[resE1[3]].hp = 0;
+                        bricks[resE1[3]].hp--;
+                        updateHps();
                         //console.log("a3 ", this.x, this.y)
                         break;
                     case 2:
@@ -349,7 +350,8 @@ export function Ball(Object){
                             this.r2Y *= -1;
                         }
                         //console.log("a4 ", this.x, this.y)
-                        bricks[resE2[3]].hp = 0;
+                        bricks[resE2[3]].hp--;
+                        updateHps();
 
                         break;
                     case 3:
@@ -374,7 +376,8 @@ export function Ball(Object){
                             this.r2Y *= -1;
                         }
                         //console.log("a5 ", this.x, this.y)
-                        bricks[resM[3]].hp = 0;
+                        bricks[resM[3]].hp--;
+                        updateHps();
                         break;
                 }
                 //console.log("a2 ", this.x, this.y)
