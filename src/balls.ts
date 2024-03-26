@@ -4,7 +4,7 @@ import { updateHps } from "./bricks.js";
 
 export let ballsList = {
     b1: {
-        r: 15,
+        r: 20,
         color: "yellow",
         brickFunction: "basic",
         wallFunction: "bounce",
@@ -22,7 +22,7 @@ export let ballsList = {
         color: "blue",
         brickFunction: "basic",
         wallFunction: "sniper",
-        speed: 2,
+        speed: 3,
     },
     b4: {
         r: 10,
@@ -75,6 +75,14 @@ export function Ball(Object){
         context.fill();
     }
 
+    this.reverseX = function() {
+        this.dX *= -1;
+    }
+
+    this.reverseY = function() {
+        this.dY *= -1;
+    }
+
 
     this.handleCollisions = function(){
         let remainingX : number = this.dX;
@@ -88,6 +96,8 @@ export function Ball(Object){
             // the ratio is the absolute ratio of distance to the wall to the vector in given axis, 0 means no collision
             let ratioY : number = 0;
             let ratioX : number = 0;
+
+            let didCollide = false;
 
             {
                 // calculating brick collisions, attempt No 2
@@ -105,27 +115,27 @@ export function Ball(Object){
 
                 // creating a brick offset array, will hold data about which bricks to check collision with
                 let brickTable = [[], [], []];
-                // x, y, corner order
+                // x, y, corner order, in format [coordX, coordY, lineX, lineY] offsets
                 if (travelX > 0) {
-                    brickTable[0] = [1, 0];
+                    brickTable[0] = [1, 0, brickX, 0];
                     if (travelY > 0) {
-                        brickTable[1] = [0, 1];
-                        brickTable[2] = [1, 1];
+                        brickTable[1] = [0, 1, 0, brickY];
+                        brickTable[2] = [1, 1, brickX, brickY];
                     }
                     else {
-                        brickTable[1] = [0, 0];
-                        brickTable[2] = [1, 0];
+                        brickTable[1] = [0, -1, 0, 0];
+                        brickTable[2] = [1, -1, brickX, 0];
                     }
                 }
                 else {
-                    brickTable[0] = [0, 0];
+                    brickTable[0] = [-1, 0, 0, 0];
                     if (travelY > 0) {
-                        brickTable[1] = [0, 1];
-                        brickTable[2] = [0, 1];
+                        brickTable[1] = [0, 1, 0, brickY];
+                        brickTable[2] = [-1, 1, 0, brickY];
                     }
                     else {
-                        brickTable[1] = [0, 0];
-                        brickTable[2] = [0, 0];
+                        brickTable[1] = [0, -1, 0, 0];
+                        brickTable[2] = [-1, -1, 0, 0];
                     }
                 }
 
@@ -136,7 +146,9 @@ export function Ball(Object){
 
                     // calculate the coords to check from
                     let coordX = Math.floor(currentX / brickX);
+                    let lineX = coordX * brickX;
                     let coordY = Math.floor(currentY / brickY);
+                    let lineY = coordY * brickY;
 
                     // move the ball to the new position
                     if (Math.abs(currentX - afterX) < Math.abs(travelX) && Math.abs(currentY - afterY) < Math.abs(travelY)) {
@@ -148,36 +160,168 @@ export function Ball(Object){
                         currentY += travelY;
                     }
 
-
-
-                    // checking collision with the bricks from the table
-
-
-                    // first x, check if the brick can actually be checked and if it still exists
-
+                    // checking which bricks exist
+                    let isX = false;
                     if (coordX > 0 && coordX < 15 && bricks[getIndex(coordX + brickTable[0][0], coordY)].hp > 0) {
-                        // now check if it collides
-                        //console.log("     ", Math.abs((coordX + brickTable[0][0]) * brickX - currentX), this.radius);
-                        if (Math.abs((coordX + brickTable[0][0]) * brickX - currentX) <= this.radius) {
-                            console.log("Collision on X!");
-                            this.dX *= -1;
-                            return;
+                        isX = true;
+                    }
+                    let isY = false;
+                    if (coordY > 0 && coordY < 31 && bricks[getIndex(coordX, coordY + brickTable[1][1])].hp > 0) {
+                        isY = true;
+                    }
+                    let isC = false;
+                    if (coordX > 0 && coordX < 15 && coordY > 0 && coordY < 31 && bricks[getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1])].hp > 0) {
+                        isC = true;
+                    }
+
+                    // check which things are crossed
+                    let crossX = false;
+                    if (coordX > 0 && coordX < 15 && Math.abs(lineX + brickTable[0][2] - currentX) <= this.radius) {
+                        crossX = true;
+                    }
+                    let crossY = false;
+                    if (coordY > 0 && coordY < 31 && Math.abs(lineY + brickTable[1][3] - currentY) <= this.radius) {
+                        crossY = true;
+                    }
+                    let crossC = false;
+                    if (coordX > 0 && coordX < 15 && coordY > 0 && coordY < 31 &&
+                        Math.sqrt(Math.pow(lineX + brickTable[2][2] - currentX, 2) +
+                        Math.pow(lineY + brickTable[2][3] - currentY, 2)) < this.radius) {
+                        crossC = true;
+                    }
+
+                    // TODO: ADD DELTA CALCULATIONS
+
+                    // now just check what to do
+                    if (isX && isY) {
+                        // both are present so corner cannot be hit
+                        if (crossX) {
+                            // collided in x, did it in y?
+                            if (crossY) {
+                                // yes, check distance to see which is closer
+
+                                // TODO: fix this
+                                this.reverseX();
+                                this.reverseY();
+                                didCollide = true;
+                                break;
+                            }
+                            else {
+                                // just X, reverse it
+                                // TODO: fix this
+                                this.reverseX();
+                                didCollide = true;
+                                break;
+                            }
+                        }
+                        else if (crossY) {
+                            // just Y, reverse it
+                            // TODO: fix this
+                            this.reverseY();
+                            didCollide = true;
+                            break;
+                        }
+                    }
+                    else if (isX) {
+                        // x is present, maybe corner too
+                        if (crossX || crossC) {
+                            // X, reverse it
+                            // TODO: fix this
+                            this.reverseX();
+                            didCollide = true;
+                            break;
+                        }
+
+                    }
+                    else if (isY) {
+                        // y is present, maybe corner too
+                        if (crossY || crossC) {
+                            // Y, reverse it
+                            // TODO: fix this
+                            this.reverseY();
+                            didCollide = true;
+                            break;
+                        }
+                    }
+                    else if (isC) {
+                        // only corner, do a corner calc and be home free
+                        if (crossC) {
+                            // TODO: fix this
+                            this.reverseX();
+                            this.reverseY();
+                            didCollide = true;
+                            break;
                         }
                     }
 
-                    if (coordX > 0 && coordX < 15 && coordY > 0 && coordY < 31 && bricks[getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1])].hp > 0) {
-                        // now check if it collides
-                        //console.log("     ", Math.abs((coordX + brickTable[2][0]) * brickX - currentX), this.radius);
-                        if (Math.abs((coordX + brickTable[2][0]) * brickX - currentX) <= this.radius) {
-                            console.log("Collision on X!");
-                            this.dX *= -1;
-                            return;
-                        }
-                    }
+
+
+
+
+
+                    //// checking collision with the bricks from the table
+                    //let colY = false;
+                    //let colX = false;
+                    //let colCX = false;
+                    //let colCY = false;
+//
+//
+                    //// first x, check if the brick can actually be checked and if it still exists
+//
+                   //if (coordX > 0 && coordX < 15 && bricks[getIndex(coordX + brickTable[0][0], coordY)].hp > 0) {
+                   //    // now check if it collides
+                   //    //console.log("     ", Math.abs((coordX + brickTable[0][0]) * brickX - currentX), this.radius);
+                   //    if (Math.abs(lineX + brickTable[0][2] - currentX) <= this.radius) {
+                   //        colX = true;
+                   //        console.log("Collision on X!");
+                   //        this.dX *= -1;
+                   //        return;
+                   //    }
+                   //}
+
+                   //// next is y
+                   //if (coordY > 0 && coordY < 31 && bricks[getIndex(coordX, coordY + brickTable[1][1])].hp > 0) {
+                   //    if (Math.abs(lineY + brickTable[1][3] - currentY) <= this.radius) {
+                   //        colY = true;
+                   //        console.log("Collision on Y!");
+                   //        this.dY *= -1;
+                   //        return;
+                   //    }
+                   //}
+
+                   //// next is corner
+                   //if (coordX > 0 && coordX < 15 && coordY > 0 && coordY < 31 && bricks[getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1])].hp > 0) {
+
+
+                   //    // checking if it is within the corner point
+                   //    if (!colX && !colY) {
+                   //        if (Math.sqrt(Math.pow(lineX + brickTable[2][2] - currentX, 2) + Math.pow(lineY + brickTable[2][3] - currentY, 2)) < this.radius) {
+                   //            // there's a collision on a corner!
+                   //            console.log("Collision on C!");
+                   //            this.dX *= -1;
+                   //            this.dY *= -1;
+                   //            return;
+                   //        }
+                   //    }
+
+                   //if (coordX > 0 && coordX < 15 && coordY > 0 && coordY < 31 && bricks[getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1])].hp > 0) {
+                   //    // now check if it collides
+                   //    //console.log("     ", Math.abs((coordX + brickTable[2][0]) * brickX - currentX), this.radius);
+                   //    if (Math.abs(lineX + brickTable[2][2] - currentX) <= this.radius) {
+                   //        console.log("Collision on X!");
+                   //        this.dX *= -1;
+                   //        return;
+                   //    }
+                   //}
                 }
             }
 
 
+            if (didCollide) {
+                //continue;
+                return;
+                // TODO: change to continue after delta calc
+            }
 
             // no bounce check for now, just collision testing
 
@@ -215,7 +359,7 @@ export function Ball(Object){
                 remainingY *= 1 - ratioX;
 
                 // reversing the direction
-                this.dX *= -1;
+                this.reverseX();
             }
             else {
                 // prioritize Y delta
@@ -225,7 +369,7 @@ export function Ball(Object){
                 remainingY *= -(1 - ratioY);
 
                 // reversing the direction
-                this.dY *= -1;
+                this.reverseY();
 
             }
         }
