@@ -2,6 +2,8 @@
 import {areaBottom, areaLeft, areaRight, areaTop, balls, bricks, canvas, context, brickX, brickY} from "./index.js";
 import { updateHps } from "./bricks.js";
 
+let ballImages = new Array();
+
 export let ballsList = {
     b1: {
         r: 15,
@@ -9,6 +11,8 @@ export let ballsList = {
         brickFunction: "basic",
         wallFunction: "bounce",
         speed: 2,
+        imageSpirit: "../assets/1.png",
+        ballIndex: 0
     },
     b2: {
         r: 20,
@@ -16,6 +20,8 @@ export let ballsList = {
         brickFunction: "explode",
         wallFunction: "bounce",
         speed: 3,
+        imageSpirit: "none" ,
+        ballIndex: 1
     },
     b3: {
         r: 10,
@@ -23,6 +29,8 @@ export let ballsList = {
         brickFunction: "basic",
         wallFunction: "sniper",
         speed: 4,
+        imageSpirit: "../assets/2.png" ,
+        ballIndex: 2
     },
     b4: {
         r: 10,
@@ -30,9 +38,29 @@ export let ballsList = {
         brickFunction: "basic",
         wallFunction: "split",
         speed: 20,
+        imageSpirit: "none" ,
+        ballIndex: 3
+        
     },
 }
 
+const ball1Image = document.createElement("img");
+const ball2Image = document.createElement("img");
+const ball3Image = document.createElement("img");
+const ball4Image = document.createElement("img");
+//export const ball5Image = document.createElement("img");
+
+ball1Image.src = ballsList.b1.imageSpirit.toString();
+ball2Image.src = ballsList.b2.imageSpirit.toString();
+ball3Image.src = ballsList.b3.imageSpirit.toString();
+ball4Image.src = ballsList.b4.imageSpirit.toString();
+//ball5Image.src = ballsList.b5.imageSpirit.toString();
+
+ballImages.push(ball1Image);
+ballImages.push(ball2Image);
+ballImages.push(ball3Image);
+ballImages.push(ball4Image);
+//ballImages.push(ball5Image);
 
 export function createBall(Object){
     let ball = new Ball(Object);
@@ -63,6 +91,8 @@ export function Ball(Object){
     this.color = Object.color;
     this.brickFunction = Object.brickFunction;
     this.wallFunction = Object.wallFunction;
+    this.image = Object.imageSpirit;
+    this.ballIndex = Object.ballIndex;
 
     // coordinates of current edges
     this.r1X = -this.dY * (this.radius / this.speed);
@@ -74,12 +104,18 @@ export function Ball(Object){
 
     this.update = () =>{
         this.handleCollisions();
-
-        // drawing
-        context.fillStyle = this.color;
-        context.beginPath();
-        context.arc(this.x,this.y,this.radius,0,Math.PI*2,true);
-        context.fill();
+ 
+        // drawing  
+        if (this.image != "none"){
+            context.fillStyle = "rgba(255, 255, 255, 0.1)";
+            context.drawImage(ballImages[this.ballIndex],this.x-this.radius,this.y-this.radius,this.radius*2,this.radius*2); 
+        }
+        else{
+            context.fillStyle = this.color;
+            context.beginPath();
+            context.arc(this.x,this.y,this.radius,0,Math.PI*2,true);
+            context.fill();
+        }
     }
 
     this.calculateBricks = function(x : number, y : number, remX : number, remY : number ) {
