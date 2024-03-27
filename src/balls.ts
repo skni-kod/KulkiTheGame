@@ -50,6 +50,14 @@ function getIndex(x : number, y : number) : number {
     return x + (y * 16);
 }
 
+function damageBrick(n : number, d : number) {
+    if (bricks[n].hp < d) {
+        bricks[n].hp = 0;
+    }
+    else {
+        bricks[n].hp -= d;
+    }
+}
 export function Ball(Object){
 
     this.x = (areaRight + areaLeft) / 2;
@@ -82,7 +90,6 @@ export function Ball(Object){
     this.reverseY = function() {
         this.dY *= -1;
     }
-
 
     this.handleCollisions = function(){
         let remainingX : number = this.dX;
@@ -162,29 +169,32 @@ export function Ball(Object){
 
                     // checking which bricks exist
                     let isX = false;
-                    if (coordX > 0 && coordX < 15 && bricks[getIndex(coordX + brickTable[0][0], coordY)].hp > 0) {
+                    if (((this.dX > 0 && coordX < 15) || (this.dX <= 0 && coordX > 0)) && bricks[getIndex(coordX + brickTable[0][0], coordY)].hp > 0) {
                         isX = true;
                     }
                     let isY = false;
-                    if (coordY > 0 && coordY < 31 && bricks[getIndex(coordX, coordY + brickTable[1][1])].hp > 0) {
+                    if (((this.dY > 0 && coordY < 31) || (this.dY <= 0 && coordY > 0)) && bricks[getIndex(coordX, coordY + brickTable[1][1])].hp > 0) {
                         isY = true;
                     }
                     let isC = false;
-                    if (coordX > 0 && coordX < 15 && coordY > 0 && coordY < 31 && bricks[getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1])].hp > 0) {
+                    if (((this.dX > 0 && coordX < 15) || (this.dX <= 0 && coordX > 0)) &&
+                        ((this.dY > 0 && coordY < 31) || (this.dY <= 0 && coordY > 0)) &&
+                        bricks[getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1])].hp > 0) {
                         isC = true;
                     }
 
                     // check which things are crossed
                     let crossX = false;
-                    if (coordX > 0 && coordX < 15 && Math.abs(lineX + brickTable[0][2] - currentX) <= this.radius) {
+                    if (isX && ((this.dX > 0 && coordX < 15) || (this.dX <= 0 && coordX > 0)) && Math.abs(lineX + brickTable[0][2] - currentX) <= this.radius) {
                         crossX = true;
                     }
                     let crossY = false;
-                    if (coordY > 0 && coordY < 31 && Math.abs(lineY + brickTable[1][3] - currentY) <= this.radius) {
+                    if (isY && ((this.dY > 0 && coordY < 31) || (this.dY <= 0 && coordY > 0)) && Math.abs(lineY + brickTable[1][3] - currentY) <= this.radius) {
                         crossY = true;
                     }
                     let crossC = false;
-                    if (coordX > 0 && coordX < 15 && coordY > 0 && coordY < 31 &&
+                    if (((this.dX > 0 && coordX < 15) || (this.dX <= 0 && coordX > 0)) &&
+                        ((this.dY > 0 && coordY < 31) || (this.dY <= 0 && coordY > 0)) &&
                         Math.sqrt(Math.pow(lineX + brickTable[2][2] - currentX, 2) +
                         Math.pow(lineY + brickTable[2][3] - currentY, 2)) < this.radius) {
                         crossC = true;
@@ -204,6 +214,8 @@ export function Ball(Object){
                                 this.reverseX();
                                 this.reverseY();
                                 didCollide = true;
+                                damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
+                                damageBrick(getIndex(coordX + brickTable[1][0], coordY + brickTable[1][1]), 1);
                                 break;
                             }
                             else {
@@ -211,6 +223,7 @@ export function Ball(Object){
                                 // TODO: fix this
                                 this.reverseX();
                                 didCollide = true;
+                                damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
                                 break;
                             }
                         }
@@ -219,6 +232,7 @@ export function Ball(Object){
                             // TODO: fix this
                             this.reverseY();
                             didCollide = true;
+                            damageBrick(getIndex(coordX + brickTable[1][0], coordY + brickTable[1][1]), 1);
                             break;
                         }
                     }
@@ -229,6 +243,7 @@ export function Ball(Object){
                             // TODO: fix this
                             this.reverseX();
                             didCollide = true;
+                            damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
                             break;
                         }
 
@@ -240,6 +255,7 @@ export function Ball(Object){
                             // TODO: fix this
                             this.reverseY();
                             didCollide = true;
+                            damageBrick(getIndex(coordX + brickTable[1][0], coordY + brickTable[1][1]), 1);
                             break;
                         }
                     }
@@ -247,72 +263,17 @@ export function Ball(Object){
                         // only corner, do a corner calc and be home free
                         if (crossC) {
                             // TODO: fix this
-                            this.reverseX();
-                            this.reverseY();
+                            if (Math.abs(this.dX) > Math.abs(this.dY)) {
+                                this.reverseX();
+                            }
+                            else {
+                                this.reverseY();
+                            }
                             didCollide = true;
+                            damageBrick(getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1]), 1);
                             break;
                         }
                     }
-
-
-
-
-
-
-                    //// checking collision with the bricks from the table
-                    //let colY = false;
-                    //let colX = false;
-                    //let colCX = false;
-                    //let colCY = false;
-//
-//
-                    //// first x, check if the brick can actually be checked and if it still exists
-//
-                   //if (coordX > 0 && coordX < 15 && bricks[getIndex(coordX + brickTable[0][0], coordY)].hp > 0) {
-                   //    // now check if it collides
-                   //    //console.log("     ", Math.abs((coordX + brickTable[0][0]) * brickX - currentX), this.radius);
-                   //    if (Math.abs(lineX + brickTable[0][2] - currentX) <= this.radius) {
-                   //        colX = true;
-                   //        console.log("Collision on X!");
-                   //        this.dX *= -1;
-                   //        return;
-                   //    }
-                   //}
-
-                   //// next is y
-                   //if (coordY > 0 && coordY < 31 && bricks[getIndex(coordX, coordY + brickTable[1][1])].hp > 0) {
-                   //    if (Math.abs(lineY + brickTable[1][3] - currentY) <= this.radius) {
-                   //        colY = true;
-                   //        console.log("Collision on Y!");
-                   //        this.dY *= -1;
-                   //        return;
-                   //    }
-                   //}
-
-                   //// next is corner
-                   //if (coordX > 0 && coordX < 15 && coordY > 0 && coordY < 31 && bricks[getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1])].hp > 0) {
-
-
-                   //    // checking if it is within the corner point
-                   //    if (!colX && !colY) {
-                   //        if (Math.sqrt(Math.pow(lineX + brickTable[2][2] - currentX, 2) + Math.pow(lineY + brickTable[2][3] - currentY, 2)) < this.radius) {
-                   //            // there's a collision on a corner!
-                   //            console.log("Collision on C!");
-                   //            this.dX *= -1;
-                   //            this.dY *= -1;
-                   //            return;
-                   //        }
-                   //    }
-
-                   //if (coordX > 0 && coordX < 15 && coordY > 0 && coordY < 31 && bricks[getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1])].hp > 0) {
-                   //    // now check if it collides
-                   //    //console.log("     ", Math.abs((coordX + brickTable[2][0]) * brickX - currentX), this.radius);
-                   //    if (Math.abs(lineX + brickTable[2][2] - currentX) <= this.radius) {
-                   //        console.log("Collision on X!");
-                   //        this.dX *= -1;
-                   //        return;
-                   //    }
-                   //}
                 }
             }
 
