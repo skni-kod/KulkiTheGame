@@ -94,13 +94,6 @@ export function Ball(Object){
     this.image = Object.imageSpirit;
     this.ballIndex = Object.ballIndex;
 
-    // coordinates of current edges
-    this.r1X = -this.dY * (this.radius / this.speed);
-    this.r1Y = this.dX * (this.radius / this.speed);
-    this.r2X = this.dY * (this.radius / this.speed);
-    this.r2Y = -this.dX * (this.radius / this.speed);
-    this.mX = this.dX * (this.radius / this.speed);
-    this.mY = this.dY * (this.radius / this.speed);
 
     this.update = () =>{
         this.handleCollisions();
@@ -118,158 +111,6 @@ export function Ball(Object){
         }
     }
 
-    this.calculateBricks = function(x : number, y : number, remX : number, remY : number ) {
-        // in order: is, x, y
-
-        if (remX > 0 ) {
-            if (x + remX >= areaRight) {
-                remX = areaRight - x - 1;
-            }
-        }
-        else {
-            if (x + remX <= areaLeft) {
-                remX = x - areaLeft + 1;
-            }
-        }
-
-        if (remY > 0 ) {
-            if (y + remY >= areaBottom) {
-                remY = areaBottom - y - 1;
-            }
-        }
-        else {
-            if (y + remY <= areaTop) {
-                remY = y - areaTop + 1;
-            }
-        }
-        //console.log(x, y);
-        while (remX != 0 && remY != 0) {
-
-           // console.log("looping");
-            // while there's a distance left check
-            let ratX  = -1;
-            let ratY  = -1;
-            let offX = 0;
-            let offY = 0;
-            if (remX > 0) {
-                // x in pos
-                // get nearest line to right
-                let temp = Math.ceil(x / brickX) * brickX;
-                if (temp >= areaRight) {
-
-                }
-                else if (remX >= temp - x) {
-                    // there's a collision, save the ratio to the line
-                    ratX = (temp - x) / remX;
-                    offX = 1;
-                }
-                // else there's no collision, leave the ratio at -1
-            }
-            else if (remX < 0) {
-                // x in neg
-                // get nearest line to left
-                let temp = Math.floor(x / brickX) * brickX;
-                if (temp <= areaLeft) {
-
-                }
-                else if (remX <= temp - x) {
-                    // there's a collision, save the ratio to the line
-                    ratX = (temp - x) / remX;
-                    offX = -1;
-                }
-                // else there's no collision, leave the ratio at -1
-            }
-            //console.log("1");
-            // same for Y
-            if (remY > 0) {
-                // y in pos
-                // get nearest line to down
-                let temp = Math.ceil(y / brickY) * brickY;
-                if (temp >= areaBottom) {
-
-                }
-                else if (remY >= temp - y) {
-                    // there's a collision, save the ratio to the line
-                    ratY = (temp - y) / remY;
-                    offY = 1;
-                }
-                // else there's no collision, leave the ratio at -1
-            }
-            else if (remY < 0) {
-                // y in neg
-                // get nearest line to up
-                let temp = Math.floor(y / brickY) * brickY;
-                if (temp <= areaTop) {
-
-                }
-                else if (remY <= temp - y) {
-                    // there's a collision, save the ratio to the line
-                    ratY = (temp - y) / remY;
-                    offY = -1;
-                }
-                // else there's no collision, leave the ratio at -1
-            }
-            //console.log("2");
-
-            // now check if there were collisions
-            //console.log(x, y, ratX, ratY);
-            if ((x > areaLeft + brickX || remX >= 0) && (x < areaRight - brickX || remX < 0) && ratX > 0 && (ratX < ratY || ratY == -1) && bricks[getIndex(Math.floor(x / brickX) + offX, Math.floor(y / brickY))].hp > 0) {
-                //console.log("col X");
-                // X must be closer
-                return [1, x + ratX * remX, y + ratX * remY, getIndex(Math.floor(x / brickX) + offX, Math.floor(y / brickY))];
-            }
-            else if ((y > areaTop + brickY || remY >= 0) && (y < areaBottom - brickY || remY < 0) && ratY > 0 && bricks[getIndex(Math.floor(x / brickX), Math.floor(y / brickY) + offY)].hp > 0) {
-                //console.log("col Y");
-                // Y is nearer
-                return [2, x + ratY * remX, y + ratY * remY, getIndex(Math.floor(x / brickX), Math.floor(y / brickY) + offY)];
-            }
-            else {
-                //console.log("3", brickX, brickY);
-                // no collision, move the calculation a little further
-                if (Math.abs(remX) < brickX) {
-                    if (Math.abs(remY) < brickY) {
-                        //console.log("4");
-                        // loop ends here, no collision and distance has been traveled
-                        return [0];
-                    }
-                    else {
-                        //console.log("5");
-                        // y still has travel left after
-                        if (remY < 0) {
-                            x += (1 + (brickY / remY)) * remX;
-                            y -= brickY;
-                            remX *= 1 + (brickY / remY);
-                            remY += brickY;
-                        }
-                        else {
-                            x += (1 - (brickY / remY)) * remX;
-                            y += brickY;
-                            remX *= 1 - (brickY / remY);
-                            remY -= brickY;
-                        }
-                    }
-
-                }
-                else if (Math.abs(remY) < brickY) {
-                    //console.log("6");
-                    // x still has travel left after
-                    if (remX < 0) {
-                        y += (1 + (brickX / remX)) * remY;
-                        x -= brickX;
-                        remY *= 1 + (brickX / remX);
-                        remX += brickX;
-                    }
-                    else {
-                        y += (1 - (brickX / remX)) * remY;
-                        x += brickX;
-                        remY *= 1 - (brickX / remX);
-                        remX -= brickX;
-                    }
-                }
-            }
-        }
-        return [0, 0, 0];
-    }
 
     this.handleCollisions = function(){
         let remainingX : number = this.dX;
@@ -284,143 +125,94 @@ export function Ball(Object){
             let ratioY : number = 0;
             let ratioX : number = 0;
 
-            // calculating wall collisions
-            // UNOPTIMIZED, EXPERIMENTAL
+            {
+                // calculating brick collisions, attempt No 2
+                // a lot of these calculations will be moved to the beginning and saved in the object to improve speed
 
-            //let r = this.calculateBricks(this.x, this.y, remainingX, remainingY);
-            //if (r[0] != 0) {
-            //    remainingX -= r[1] - this.x;
-            //    remainingY -= r[2] - this.y;
-            //    this.x = r[1];
-            //    this.y = r[2];
-            //    if (r[0] == 1) {
-            //        // reverse X
-            //        this.dX *= -1;
-            //        this.mX *= -1;
-            //        this.r1X *= -1;
-            //        this.r2X *= -1;
-            //    }
-            //    else {
-            //        this.dY *= -1;
-            //        this.mY *= -1;
-            //        this.r1Y *= -1;
-            //        this.r2Y *= -1;
-            //    }
-            //}
+                // first define a distance to travel between bound checks
+                // too small will lead to decreased performance, too high may result in clipping
+                // it will need to be optimized via experiments
+                const travelDistance : number = 1;
 
-            //console.log("start");
-            let resE1 = this.calculateBricks(this.x + this.r1X, this.y + this.r1Y, remainingX, remainingY);
-            let resE2 = this.calculateBricks(this.x + this.r2X, this.y + this.r2Y, remainingX, remainingY);
-            let resM = this.calculateBricks(this.x + this.mX, this.y + this.mY, remainingX, remainingY);
-            //let resE2 = [0, 0, 0];
-            //let resE1 = [0, 0, 0];
-            //console.log("after");
-            // good ol if's
-            // get distance
-            let which = 0;
-            let min = 1000000;
-            if (resE1[0] != 0) {
-                min = Math.pow(resE1[1], 2) + Math.pow(resE1[2], 2);
-                which = 1;
-            }
-            if (resE2[0] != 0) {
-                let temp = Math.pow(resE2[1], 2) + Math.pow(resE2[2], 2);
-                if (temp < min) {
-                    min = temp;
-                    which = 2;
+                // calculate the travel in x and y to know how much to move without much calculation
+                // this should be faster too, oh wait, this is javascript
+                const travelX : number = this.dX / this.speed * travelDistance;
+                const travelY : number = this.dY / this.speed * travelDistance;
+
+                // creating a brick offset array, will hold data about which bricks to check collision with
+                let brickTable = [[], [], []];
+                // x, y, corner order
+                if (travelX > 0) {
+                    brickTable[0] = [1, 0];
+                    if (travelY > 0) {
+                        brickTable[1] = [0, 1];
+                        brickTable[2] = [1, 1];
+                    }
+                    else {
+                        brickTable[1] = [0, 0];
+                        brickTable[2] = [1, 0];
+                    }
+                }
+                else {
+                    brickTable[0] = [0, 0];
+                    if (travelY > 0) {
+                        brickTable[1] = [0, 1];
+                        brickTable[2] = [0, 1];
+                    }
+                    else {
+                        brickTable[1] = [0, 0];
+                        brickTable[2] = [0, 0];
+                    }
+                }
+
+                // now start a loop, going this distance and stopping when it's reached, probably a break will exit it
+                let currentX = this.x;
+                let currentY = this.y;
+                while (currentX != afterX && currentY != afterY) {
+
+                    // calculate the coords to check from
+                    let coordX = Math.floor(currentX / brickX);
+                    let coordY = Math.floor(currentY / brickY);
+
+                    // move the ball to the new position
+                    if (Math.abs(currentX - afterX) < Math.abs(travelX) && Math.abs(currentY - afterY) < Math.abs(travelY)) {
+                        currentX = afterX;
+                        currentY = afterY;
+                    }
+                    else {
+                        currentX += travelX;
+                        currentY += travelY;
+                    }
+
+
+
+                    // checking collision with the bricks from the table
+
+
+                    // first x, check if the brick can actually be checked and if it still exists
+
+                    if (coordX > 0 && coordX < 15 && bricks[getIndex(coordX + brickTable[0][0], coordY)].hp > 0) {
+                        // now check if it collides
+                        //console.log("     ", Math.abs((coordX + brickTable[0][0]) * brickX - currentX), this.radius);
+                        if (Math.abs((coordX + brickTable[0][0]) * brickX - currentX) <= this.radius) {
+                            console.log("Collision on X!");
+                            this.dX *= -1;
+                            return;
+                        }
+                    }
+
+                    if (coordX > 0 && coordX < 15 && coordY > 0 && coordY < 31 && bricks[getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1])].hp > 0) {
+                        // now check if it collides
+                        //console.log("     ", Math.abs((coordX + brickTable[2][0]) * brickX - currentX), this.radius);
+                        if (Math.abs((coordX + brickTable[2][0]) * brickX - currentX) <= this.radius) {
+                            console.log("Collision on X!");
+                            this.dX *= -1;
+                            return;
+                        }
+                    }
                 }
             }
-            if (resM[0] != 0) {
-                let temp = Math.pow(resM[1], 2) + Math.pow(resM[2], 2);
-                if (temp < min) {
-                    min = temp;
-                    which = 3;
-                }
-            }
-            //console.log("a1 ", this.x, this.y)
 
-            if (which != 0) {
-                // now there's only one, the one closest
-                switch (which) {
-                    case 1:
-                        // edge 1
-                        //console.log("calc: ", resE1);
-                        remainingX -= (resE1[1] - this.r1X) - this.x;
-                        remainingY -= (resE1[2] - this.r1Y) - this.y;
-                        this.x = resE1[1] - this.r1X;
-                        this.y = resE1[2] - this.r1Y;
-                        if (resE1[0] == 1) {
-                            // reverse X
-                            this.dX *= -1;
-                            this.mX *= -1;
-                            this.r1X *= -1;
-                            this.r2X *= -1;
-                        }
-                        else {
-                            this.dY *= -1;
-                            this.mY *= -1;
-                            this.r1Y *= -1;
-                            this.r2Y *= -1;
-                        }
-                        bricks[resE1[3]].hp--;
-                        updateHps();
-                        //console.log("a3 ", this.x, this.y)
-                        break;
-                    case 2:
-                        // edge 2
-                        remainingX -= (resE2[1] - this.r2X) - this.x;
-                        remainingY -= (resE2[2] - this.r2Y) - this.y;
-                        this.x = resE2[1] - this.r2X;
-                        this.y = resE2[2] - this.r2Y;
-                        if (resE2[0] == 1) {
-                            // reverse X
-                            this.dX *= -1;
-                            this.mX *= -1;
-                            this.r1X *= -1;
-                            this.r2X *= -1;
-                        }
-                        else {
-                            this.dY *= -1;
-                            this.mY *= -1;
-                            this.r1Y *= -1;
-                            this.r2Y *= -1;
-                        }
-                        //console.log("a4 ", this.x, this.y)
-                        bricks[resE2[3]].hp--;
-                        updateHps();
-
-                        break;
-                    case 3:
-                        //console.log("prea5 ", this.x, this.y)
-                        // middle
-                        remainingX -= (resM[1] - this.mX) - this.x;
-                        remainingY -= (resM[2] - this.mY) - this.y;
-                        this.x = resM[1] - this.mX;
-                        this.y = resM[2] - this.mY;
-                        //console.log(resM[1], resM[2], )
-                        if (resM[0] == 1) {
-                            // reverse X
-                            this.dX *= -1;
-                            this.mX *= -1;
-                            this.r1X *= -1;
-                            this.r2X *= -1;
-                        }
-                        else {
-                            this.dY *= -1;
-                            this.mY *= -1;
-                            this.r1Y *= -1;
-                            this.r2Y *= -1;
-                        }
-                        //console.log("a5 ", this.x, this.y)
-                        bricks[resM[3]].hp--;
-                        updateHps();
-                        break;
-                }
-                //console.log("a2 ", this.x, this.y)
-                continue;
-            }
-
-            //console.log("after loop");
 
 
             // no bounce check for now, just collision testing
@@ -460,9 +252,6 @@ export function Ball(Object){
 
                 // reversing the direction
                 this.dX *= -1;
-                this.mX *= -1;
-                this.r1X *= -1;
-                this.r2X *= -1;
             }
             else {
                 // prioritize Y delta
@@ -473,9 +262,6 @@ export function Ball(Object){
 
                 // reversing the direction
                 this.dY *= -1;
-                this.mY *= -1;
-                this.r1Y *= -1;
-                this.r2Y *= -1;
 
             }
         }
