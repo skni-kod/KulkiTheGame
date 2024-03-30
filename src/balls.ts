@@ -20,7 +20,7 @@ export let ballsList = {
         brickFunction: "explode",
         wallFunction: "bounce",
         speed: 3,
-        imageSpirit: "none" ,
+        imageSpirit: "none",
         ballIndex: 1
     },
     b3: {
@@ -28,7 +28,7 @@ export let ballsList = {
         color: "blue",
         brickFunction: "basic",
         wallFunction: "sniper",
-        speed: 4,
+        speed: 10,
         imageSpirit: "../assets/2.png" ,
         ballIndex: 2
     },
@@ -48,7 +48,7 @@ const ball1Image = document.createElement("img");
 const ball2Image = document.createElement("img");
 const ball3Image = document.createElement("img");
 const ball4Image = document.createElement("img");
-//export const ball5Image = document.createElement("img");
+//const ball5Image = document.createElement("img");
 
 ball1Image.src = ballsList.b1.imageSpirit.toString();
 ball2Image.src = ballsList.b2.imageSpirit.toString();
@@ -130,7 +130,7 @@ export function Ball(Object){
         let remainingX : number = this.dX;
         let remainingY : number = this.dY;
 
-        console.log("start ", this.dX, this.dY);
+        //console.log("start ", this.dX, this.dY);
         while (remainingX != 0 || remainingY != 0) {
 
             let afterX = this.x + remainingX;
@@ -322,8 +322,8 @@ export function Ball(Object){
                     }
                 }
             }
-            console.log("1");
-            console.log("2 ", this.dX, this.dY);
+            //console.log("1");
+            //console.log("2 ", this.dX, this.dY);
 
 
             // no bounce check for now, just collision testing
