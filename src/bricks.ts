@@ -4,7 +4,7 @@ import {areaBottom, areaLeft, areaRight, areaTop, balls, bricks, canvas, context
 function Brick(x: number, y: number, width: number, height: number) {
     this.x = x;
     this.y = y;
-    this.hp = (Math.random() * 3 > 2.6 ? Math.floor(Math.random() * 10) : 0);
+    this.hp = (Math.random() * 3 > 2 ? Math.floor(Math.random() * 10) : 0);
     this.width = width;
     this.height = height;
     this.strokeStyle = "black";
