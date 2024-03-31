@@ -61,6 +61,17 @@ function brickHp(x: number, y: number, hp: number, brickIndex: number){
     }
 }
 
+function handleMouseClick(){
+    function locateBrickByXY(x: number, y: number){
+        let indexOX: number = Math.floor(x / (areaRight / densityX));
+        let indexOY: number = Math.floor(y / (areaBottom / densityY))
+        return indexOX + indexOY * densityX;
+    }
+    canvas.addEventListener("click", (e) =>{
+        bricks[locateBrickByXY(e.offsetX,e.offsetY)].hp --;
+    });
+}
+
 export function createBrick(){
     let offsetX: number = (areaRight - areaLeft) / densityX;
     let offsetY: number = (areaBottom - areaTop) / densityY;
@@ -73,6 +84,7 @@ export function createBoard(numberOfBricks: number){
     for (let i: number = 0; i < numberOfBricks; i++){
         createBrick();
     }
+    handleMouseClick();
 }
 
 export function setHps(){
