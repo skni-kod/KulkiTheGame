@@ -1,15 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap');
+
 *{
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: "Reddit Mono";
+    user-select: none;
 }
+
 #app{
     font-family: Arial, sans-serif;
     text-align: center;
     margin-top: 50px;
 }
+
 body{
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#game{
+    border: 5px solid black;
+}
+
+#navigation{
+    border-color: black;
+    border-style: solid;
+    border-width: 5px 5px 5px 0;
+    box-sizing: content-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: space-around;
+}
+
+.submenu-items{
+    display: grid;
+    grid-template-columns:75px 75px;
+    grid-auto-rows: 50px;
+}
+
+.grid-item{
+    position: relative;
+    width: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid black;
+    cursor: pointer;
+}
+
+.submenu-title{
+    text-align: center;
+}
+
+#levelLabel, #moneyLabel{
+    margin-bottom: 20px;
+}
+
+#levelLabel{
+    font-weight: 900;
+    font-size: 30px;
+}
+.current-balls-count{
+    position: absolute;
+    bottom: 0px;
+    right: 1px;
 }
