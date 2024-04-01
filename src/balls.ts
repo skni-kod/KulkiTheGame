@@ -20,7 +20,7 @@ export let ballsList = {
         brickFunction: "explode",
         wallFunction: "bounce",
         speed: 3,
-        imageSpirit: "none",
+        imageSpirit: "../assets/2.png",
         ballIndex: 1
     },
     b3: {
@@ -29,7 +29,7 @@ export let ballsList = {
         brickFunction: "basic",
         wallFunction: "sniper",
         speed: 10,
-        imageSpirit: "../assets/2.png" ,
+        imageSpirit: "../assets/3.png" ,
         ballIndex: 2
     },
     b4: {
@@ -38,7 +38,7 @@ export let ballsList = {
         brickFunction: "basic",
         wallFunction: "split",
         speed: 20,
-        imageSpirit: "none" ,
+        imageSpirit: "../assets/4.png" ,
         ballIndex: 3
         
     },

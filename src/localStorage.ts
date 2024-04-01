@@ -11,6 +11,8 @@ export class LocalStorage {
                 b3: 1,
                 b4: 0,
                 b5: 0,
+                u1: 1,
+                u2: 1
             }));
         }
     }
@@ -23,10 +25,10 @@ export class LocalStorage {
         }
     }
 
-    static addItem(key: string){
+    static addItem(key: string, value: number){
         let temp = JSON.parse(localStorage.getItem("settings") || "{}");
         if (temp){
-            temp[key] = temp[key] + 1;
+            temp[key] = temp[key] + value;
             localStorage.setItem("settings", JSON.stringify(temp));
         }
     }

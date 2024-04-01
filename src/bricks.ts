@@ -1,4 +1,6 @@
 import {areaBottom, areaLeft, areaRight, areaTop, balls, bricks, canvas, context, densityX, densityY, bricksHps} from "./index.js";
+import { LocalStorage } from "./localStorage.js";
+import { updateNavbar } from "./navbar.js";
 
 //Bricks
 function Brick(x: number, y: number, width: number, height: number) {
@@ -68,7 +70,13 @@ function handleMouseClick(){
         return indexOX + indexOY * densityX;
     }
     canvas.addEventListener("click", (e) =>{
-        bricks[locateBrickByXY(e.offsetX,e.offsetY)].hp --;
+        let clickedBrick = bricks[locateBrickByXY(e.offsetX,e.offsetY)];
+        let clickPower = LocalStorage.getItem("u1");
+        if (clickedBrick.hp > 0){
+            LocalStorage.addItem("money",clickPower > clickedBrick.hp ? clickedBrick.hp : clickPower);
+            clickedBrick.hp -= clickPower;
+            updateNavbar(); 
+        }
     });
 }
 
