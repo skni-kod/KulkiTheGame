@@ -1,4 +1,6 @@
 import {areaBottom, areaLeft, areaRight, areaTop, balls, bricks, canvas, context, densityX, densityY, bricksHps} from "./index.js";
+import { LocalStorage } from "./localStorage.js";
+import { updateNavbar } from "./navbar.js";
 
 //Bricks
 function Brick(x: number, y: number, width: number, height: number) {
@@ -61,6 +63,23 @@ function brickHp(x: number, y: number, hp: number, brickIndex: number){
     }
 }
 
+function handleMouseClick(){
+    function locateBrickByXY(x: number, y: number){
+        let indexOX: number = Math.floor(x / (areaRight / densityX));
+        let indexOY: number = Math.floor(y / (areaBottom / densityY))
+        return indexOX + indexOY * densityX;
+    }
+    canvas.addEventListener("click", (e) =>{
+        let clickedBrick = bricks[locateBrickByXY(e.offsetX,e.offsetY)];
+        let clickPower = LocalStorage.getItem("u1");
+        if (clickedBrick.hp > 0){
+            LocalStorage.addItem("money",clickPower > clickedBrick.hp ? clickedBrick.hp : clickPower);
+            clickedBrick.hp -= clickPower;
+            updateNavbar(); 
+        }
+    });
+}
+
 export function createBrick(){
     let offsetX: number = (areaRight - areaLeft) / densityX;
     let offsetY: number = (areaBottom - areaTop) / densityY;
@@ -73,6 +92,7 @@ export function createBoard(numberOfBricks: number){
     for (let i: number = 0; i < numberOfBricks; i++){
         createBrick();
     }
+    handleMouseClick();
 }
 
 export function setHps(){
