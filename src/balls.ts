@@ -46,7 +46,6 @@ export function updateBalls(){
 }
 
 function getIndex(x : number, y : number) : number {
-    //console.log(x, y);
     return x + (y * 16);
 }
 
@@ -95,7 +94,7 @@ export function Ball(Object){
         let remainingX : number = this.dX;
         let remainingY : number = this.dY;
 
-        console.log("start ", this.dX, this.dY);
+        //console.log("start ", this.dX, this.dY, this.mX, this.mY);
         while (remainingX != 0 || remainingY != 0) {
 
             let afterX = this.x + remainingX;
@@ -104,6 +103,8 @@ export function Ball(Object){
             let ratioY : number = 0;
             let ratioX : number = 0;
 
+            let didCollide = false;
+
             {
                 // calculating brick collisions, attempt No 2
                 // a lot of these calculations will be moved to the beginning and saved in the object to improve speed
@@ -111,7 +112,7 @@ export function Ball(Object){
                 // first define a distance to travel between bound checks
                 // too small will lead to decreased performance, too high may result in clipping
                 // it will need to be optimized via experiments
-                const travelDistance : number = 2;
+                const travelDistance : number = 10;
 
                 // calculate the travel in x and y to know how much to move without much calculation
                 // this should be faster too, oh wait, this is javascript
@@ -119,7 +120,7 @@ export function Ball(Object){
                 const travelY : number = this.dY / this.speed * travelDistance;
 
                 // creating a brick offset array, will hold data about which bricks to check collision with
-                let brickTable = [[], [], [], []];
+                let brickTable = [[], [], []];
                 // x, y, corner order, in format [coordX, coordY, lineX, lineY] offsets
                 if (travelX > 0) {
                     brickTable[0] = [1, 0, brickX, 0];
@@ -147,8 +148,11 @@ export function Ball(Object){
                 // now start a loop, going this distance and stopping when it's reached, probably a break will exit it
                 let currentX = this.x;
                 let currentY = this.y;
-                while (currentX != afterX && currentY != afterY) {
+                let runNext = true;
+                while (runNext) {
 
+                    let lastX = currentX;
+                    let lastY = currentY;
                     // calculate the coords to check from
                     let coordX = Math.floor(currentX / brickX);
                     let lineX = coordX * brickX;
@@ -156,9 +160,10 @@ export function Ball(Object){
                     let lineY = coordY * brickY;
 
                     // move the ball to the new position
-                    if (Math.abs(currentX - afterX) < Math.abs(travelX) && Math.abs(currentY - afterY) < Math.abs(travelY)) {
+                    if (Math.abs(afterX - currentX) < Math.abs(travelX) && Math.abs(afterY - currentY) < Math.abs(travelY)) {
                         currentX = afterX;
                         currentY = afterY;
+                        runNext = false;
                     }
                     else {
                         currentX += travelX;
@@ -188,108 +193,120 @@ export function Ball(Object){
 
                     // check which things are crossed
                     let crossX = false;
-                    if (((this.dX > 0 && coordX < 15) || (this.dX <= 0 && coordX > 0)) && Math.abs(lineX + brickTable[0][2] - currentX) <= this.radius) {
+                    if (isX && ((this.dX > 0 && coordX < 15) || (this.dX <= 0 && coordX > 0)) && Math.abs(lineX + brickTable[0][2] - currentX) <= this.radius) {
                         crossX = true;
                     }
                     let crossY = false;
-                    if (((this.dY > 0 && coordY < 31) || (this.dY <= 0 && coordY > 0)) && Math.abs(lineY + brickTable[1][3] - currentY) <= this.radius) {
+                    if (isY && ((this.dY > 0 && coordY < 31) || (this.dY <= 0 && coordY > 0)) && Math.abs(lineY + brickTable[1][3] - currentY) <= this.radius) {
                         crossY = true;
                     }
                     let crossC = false;
                     if (((this.dX > 0 && coordX < 15) || (this.dX <= 0 && coordX > 0)) &&
                         ((this.dY > 0 && coordY < 31) || (this.dY <= 0 && coordY > 0)) &&
                         Math.sqrt(Math.pow(lineX + brickTable[2][2] - currentX, 2) +
-                        Math.pow(lineY + brickTable[2][3] - currentY, 2)) < this.radius) {
+                            Math.pow(lineY + brickTable[2][3] - currentY, 2)) < this.radius) {
                         crossC = true;
                     }
 
+
                     // now just check what to do
-                    if (isX && isY && crossX && crossY) {
-                        // both are present so corner cannot be hit, check which is closer
-                        if (crossY && Math.abs((lineY + brickTable[1][3] - currentY) / remainingY) < Math.abs((lineX + brickTable[0][2] - currentX) / remainingX)) {
-                            // y is present
-                            // calculate the ratio of movement
-                            let ratio = (remainingY > 0 ? (lineY + brickTable[1][3] - this.radius - this.y) : (this.y - (lineY + brickTable[1][3] + this.radius))) / remainingY;
-                            // move and change remaining
-                            this.x += remainingX * ratio;
-                            this.y += remainingY * ratio;
-                            remainingX *= (1 - ratio);
-                            remainingY *= -(1 - ratio);
+                    if (isX && isY) {
+                        // both are present so corner cannot be hit
+                        if (crossX) {
+                            // collided in x, did it in y?
+                            if (crossY) {
+                                // yes, check distance to see which is closer
+
+                                this.reverseX();
+                                this.reverseY();
+                                didCollide = true;
+                                damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
+                                damageBrick(getIndex(coordX + brickTable[1][0], coordY + brickTable[1][1]), 1);
+                                this.x = lastX;
+                                this.y = lastY;
+                                remainingX = afterX - this.x;
+                                remainingY = afterY - this.y;
+                                break;
+                            }
+                            else {
+                                // just X, reverse it
+                                this.reverseX();
+                                didCollide = true;
+                                damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
+                                this.x = lastX;
+                                this.y = lastY;
+                                remainingX = afterX - this.x;
+                                remainingY = afterY - this.y;
+                                break;
+                            }
+                        }
+                        else if (crossY) {
+                            // just Y, reverse it
                             this.reverseY();
+                            didCollide = true;
                             damageBrick(getIndex(coordX + brickTable[1][0], coordY + brickTable[1][1]), 1);
-                            break;
-                        }
-                        else {
-                            // x is present
-                            // calculate the ratio of movement
-                            let ratio = (remainingX > 0 ? (lineX + brickTable[0][3] - this.radius - this.x) : (this.x - (lineX + brickTable[0][3] + this.radius))) / remainingX;
-                            // move and change remaining
-                            this.x += remainingX * ratio;
-                            this.y += remainingY * ratio;
-                            remainingX *= -(1 - ratio);
-                            remainingY *= (1 - ratio);
-                            this.reverseX();
-                            damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
+                            this.x = lastX;
+                            this.y = lastY;
+                            remainingX = afterX - this.x;
+                            remainingY = afterY - this.y;
                             break;
                         }
                     }
-                    else if (isX && (crossX || crossC)) {
+                    else if (isX) {
                         // x is present, maybe corner too
-                        // calculate the ratio of movement
-                        let ratio = (remainingX > 0 ? (lineX + brickTable[0][3] - this.radius - this.x) : (this.x - (lineX + brickTable[0][3] + this.radius))) / remainingX;
-                        // move and change remaining
-                        this.x += remainingX * ratio;
-                        this.y += remainingY * ratio;
-                        remainingX *= -(1 - ratio);
-                        remainingY *= (1 - ratio);
-                        this.reverseX();
-                        damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
-                        break;
-                    }
-                    else if (isY && (crossY || crossC)) {
-                        // y is present, maybe corner too
-                        // calculate the ratio of movement
-                        let ratio = (remainingY > 0 ? (lineY + brickTable[1][3] - this.radius - this.y) : (this.y - (lineY + brickTable[1][3] + this.radius))) / remainingY;
-                        // move and change remaining
-                        this.x += remainingX * ratio;
-                        this.y += remainingY * ratio;
-                        remainingX *= (1 - ratio);
-                        remainingY *= -(1 - ratio);
-                        this.reverseY();
-                        damageBrick(getIndex(coordX + brickTable[1][0], coordY + brickTable[1][1]), 1);
-                        break;
-                    }
-                    else if (isC && crossC) {
-                        // only corner, the worst possible case, requires finding a precise distance where it touches
-
-                        // find the coords
-                        let correctX = lineX + brickTable[2][2] - (this.radius * this.dX / this.speed);
-                        let correctY = lineY + brickTable[2][3] - (this.radius * this.dY / this.speed);
-
-                        // get the ratio
-                        let ratio = remainingX > 0 ? Math.abs(lineX + brickTable[2][2] - correctX) / Math.abs(lineX + brickTable[2][2] - currentX) : Math.abs(lineY + brickTable[2][3] - correctY) / Math.abs(lineY + brickTable[2][3] - currentY);
-                        this.x += remainingX * ratio;
-                        this.y += remainingY * ratio;
-
-
-                        if (Math.abs(remainingX) > Math.abs(remainingY)) {
-                            remainingX *= -(1 - ratio);
-                            remainingY *= (1 - ratio);
+                        if (crossX || crossC) {
+                            // X, reverse it
                             this.reverseX();
+                            didCollide = true;
+                            damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
+                            this.x = lastX;
+                            this.y = lastY;
+                            remainingX = afterX - this.x;
+                            remainingY = afterY - this.y;
+                            break;
                         }
-                        else {
-                            remainingX *= (1 - ratio);
-                            remainingY *= -(1 - ratio);
+
+                    }
+                    else if (isY) {
+                        // y is present, maybe corner too
+                        if (crossY || crossC) {
+                            // Y, reverse it
                             this.reverseY();
+                            didCollide = true;
+                            damageBrick(getIndex(coordX + brickTable[1][0], coordY + brickTable[1][1]), 1);
+                            this.x = lastX;
+                            this.y = lastY;
+                            remainingX = afterX - this.x;
+                            remainingY = afterY - this.y;
+                            break;
                         }
-                        damageBrick(getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1]), 1);
-                        break;
+                    }
+                    else if (isC) {
+                        // only corner, do a corner calc and be home free
+                        if (crossC) {
+                            if (Math.abs(this.dX) > Math.abs(this.dY)) {
+                                this.reverseX();
+                            }
+                            else {
+                                this.reverseY();
+                            }
+                            didCollide = true;
+                            damageBrick(getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1]), 1);
+                            this.x = lastX;
+                            this.y = lastY;
+                            remainingX = afterX - this.x;
+                            remainingY = afterY - this.y;
+
+                            break;
+                        }
                     }
                 }
             }
-            console.log("1");
-            console.log("2 ", this.dX, this.dY);
 
+
+            if (didCollide) {
+                return;
+            }
 
             // no bounce check for now, just collision testing
 
