@@ -6,11 +6,12 @@ let ballImages = new Array();
 
 export let ballsList = {
     b1: {
-        r: 20,
+        r: 10,
         color: "yellow",
         brickFunction: "basic",
         wallFunction: "bounce",
         speed: 2,
+        damage: 1,
         imageSpirit: "../assets/1.png",
         ballIndex: 0
     },
@@ -20,6 +21,8 @@ export let ballsList = {
         brickFunction: "explode",
         wallFunction: "bounce",
         speed: 3,
+        damage: 6,
+        damageRadius: 2,
         imageSpirit: "../assets/2.png",
         ballIndex: 1
     },
@@ -29,6 +32,7 @@ export let ballsList = {
         brickFunction: "basic",
         wallFunction: "sniper",
         speed: 10,
+        damage: 6,
         imageSpirit: "../assets/3.png" ,
         ballIndex: 2
     },
@@ -38,6 +42,7 @@ export let ballsList = {
         brickFunction: "basic",
         wallFunction: "split",
         speed: 20,
+        damage: 6,
         imageSpirit: "../assets/4.png" ,
         ballIndex: 3
 
@@ -96,11 +101,28 @@ export function Ball(Object){
     this.dY = (((Math.random() * 2) - 1) > 0 ? 1 : -1 ) * (Math.sqrt((this.speed * this.speed) - (Math.pow((this.dX), 2))));
 
     this.radius = Object.r;
+    this.damage = Object.damage;
+    this.damageRadius = Object.damageRadius;
     this.color = Object.color;
     this.brickFunction = Object.brickFunction;
     this.wallFunction = Object.wallFunction;
     this.image = Object.imageSpirit;
     this.ballIndex = Object.ballIndex;
+
+    this.brickHit = function(x : number, y : number) {
+        switch (this.brickFunction) {
+            case "basic":
+                damageBrick(getIndex(x, y), this.damage);
+                break;
+            case "explode":
+                for (let cX = x - this.damageRadius >= 0 ? x - this.damageRadius : 0; cX < (x + this.damageRadius <= 15 ? x + this.damageRadius : 15); cX++) {
+                    for (let cY = y - this.damageRadius >= 0 ? y - this.damageRadius : 0; cY < (y + this.damageRadius <= 31 ? y + this.damageRadius : 31); cY++) {
+                        damageBrick(getIndex(cX, cY), this.damage);
+                    }
+                }
+                break;
+        }
+    }
 
     this.update = () =>{
         this.handleCollisions();
@@ -147,7 +169,8 @@ export function Ball(Object){
                 // first define a distance to travel between bound checks
                 // too small will lead to decreased performance, too high may result in clipping
                 // it will need to be optimized via experiments
-                const travelDistance : number = 10;
+                // values over 9 seem to break things, better keep it at 8 max to be safe
+                const travelDistance : number = 5;
 
                 // calculate the travel in x and y to know how much to move without much calculation
                 // this should be faster too, oh wait, this is javascript
@@ -185,6 +208,7 @@ export function Ball(Object){
                 let currentY = this.y;
                 let runNext = true;
                 while (runNext) {
+                    //console.log(currentX, currentY, remainingX, remainingY);
 
                     let lastX = currentX;
                     let lastY = currentY;
@@ -255,8 +279,8 @@ export function Ball(Object){
                                 this.reverseX();
                                 this.reverseY();
                                 didCollide = true;
-                                damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
-                                damageBrick(getIndex(coordX + brickTable[1][0], coordY + brickTable[1][1]), 1);
+                                this.brickHit(coordX + brickTable[0][0], coordY + brickTable[0][1]);
+                                this.brickHit(coordX + brickTable[1][0], coordY + brickTable[1][1]);
                                 this.x = lastX;
                                 this.y = lastY;
                                 remainingX = afterX - this.x;
@@ -267,7 +291,7 @@ export function Ball(Object){
                                 // just X, reverse it
                                 this.reverseX();
                                 didCollide = true;
-                                damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
+                                this.brickHit(coordX + brickTable[0][0], coordY + brickTable[0][1]);
                                 this.x = lastX;
                                 this.y = lastY;
                                 remainingX = afterX - this.x;
@@ -279,7 +303,7 @@ export function Ball(Object){
                             // just Y, reverse it
                             this.reverseY();
                             didCollide = true;
-                            damageBrick(getIndex(coordX + brickTable[1][0], coordY + brickTable[1][1]), 1);
+                            this.brickHit(coordX + brickTable[1][0], coordY + brickTable[1][1]);
                             this.x = lastX;
                             this.y = lastY;
                             remainingX = afterX - this.x;
@@ -293,7 +317,7 @@ export function Ball(Object){
                             // X, reverse it
                             this.reverseX();
                             didCollide = true;
-                            damageBrick(getIndex(coordX + brickTable[0][0], coordY + brickTable[0][1]), 1);
+                            this.brickHit(coordX + brickTable[0][0], coordY + brickTable[0][1]);
                             this.x = lastX;
                             this.y = lastY;
                             remainingX = afterX - this.x;
@@ -308,7 +332,7 @@ export function Ball(Object){
                             // Y, reverse it
                             this.reverseY();
                             didCollide = true;
-                            damageBrick(getIndex(coordX + brickTable[1][0], coordY + brickTable[1][1]), 1);
+                            this.brickHit(coordX + brickTable[1][0], coordY + brickTable[1][1]);
                             this.x = lastX;
                             this.y = lastY;
                             remainingX = afterX - this.x;
@@ -326,7 +350,7 @@ export function Ball(Object){
                                 this.reverseY();
                             }
                             didCollide = true;
-                            damageBrick(getIndex(coordX + brickTable[2][0], coordY + brickTable[2][1]), 1);
+                            this.brickHit(coordX + brickTable[2][0], coordY + brickTable[2][1]);
                             this.x = lastX;
                             this.y = lastY;
                             remainingX = afterX - this.x;
@@ -340,6 +364,25 @@ export function Ball(Object){
 
 
             if (didCollide) {
+
+                // might be useless
+                if (this.x > areaRight) {
+                    this.x = areaRight - this.radius - 1;
+                    console.log("happened!");
+                }
+                if (this.x < areaLeft) {
+                    this.x = areaLeft + this.radius + 1;
+                    console.log("happened!");
+                }
+                if (this.y > areaBottom) {
+                    this.y = areaBottom - this.radius - 1;
+                    console.log("happened!");
+                }
+                if (this.y < areaTop) {
+                    this.y = areaTop + this.radius + 1;
+                    console.log("happened!");
+                }
+
                 return;
             }
 
